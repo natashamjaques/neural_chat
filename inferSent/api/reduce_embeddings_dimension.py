@@ -9,8 +9,6 @@ import numpy as np
 from sklearn.decomposition import PCA
 import argparse
 
-np.random.seed(0)
-
 
 def load_pickle(path):
     if 'streaming' in path:
