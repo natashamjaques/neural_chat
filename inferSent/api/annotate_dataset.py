@@ -17,8 +17,6 @@ if __name__ == "__main__":
                                                                                    "pickle or dump everything "
                                                                                    "at once. Use streaming for "
                                                                                    "large datasets")
-    argparser.add_argument('--exportembeddings', action="store_true", default=False,
-                           help="Whether to export infersent embeddings.")
     argparser.add_argument('--debuglen', type=int, default=5, help="Number of the sentences to show the output for")
     argparser.add_argument('--step', type=int, default=100, help="Number of steps for saving output")
     argparser.add_argument('--version', type=int, default=1, help="Which model version of inferSent to use. "
@@ -53,29 +51,28 @@ if __name__ == "__main__":
     sentences = pickle.load(open(args.filepath, 'rb'))
     flattened_sentences = [utterance for conversation in sentences for utterance in conversation]
 
-    if args.exportembeddings:
-        print('exporting embeddings...')
-        flattened_embeddings = model.encode(flattened_sentences, tokenize=True, bsize=64)
-        print('exported.')
-        idx = 0
-        sent_idx = 0
-        for conversation in sentences:
-            idx += 1
-            conversation_embeddings = []
-            for sentence in conversation:
-                conversation_embeddings += [list(flattened_embeddings[sent_idx])]
-                if idx < args.debuglen:
-                    print(flattened_embeddings[sent_idx])
-                sent_idx += 1
-            if idx % args.step == 0:
-                print(f'Conversations: {idx}, Sentences embedded: {sent_idx}')
-            if args.streaming:
-                if idx == 1:
-                    pickle.dump(conversation_embeddings, open(output_path, 'wb'))
-                else:
-                    pickle.dump(conversation_embeddings, open(output_path, 'ab'))
-            sentence_embeddings += [conversation_embeddings]
-        print(f'Conversations: {idx}, Sentences embedded: {sent_idx}')
-        if not args.streaming:
-            pickle.dump(sentence_embeddings, open(output_path, 'wb'))
+    print('Encoding sentences ...')
+    flattened_embeddings = model.encode(flattened_sentences, tokenize=True, bsize=64)
+    print('InferSent encoding done.')
+    idx = 0
+    sent_idx = 0
+    for conversation in sentences:
+        idx += 1
+        conversation_embeddings = []
+        for sentence in conversation:
+            conversation_embeddings += [list(flattened_embeddings[sent_idx])]
+            if idx < args.debuglen:
+                print(flattened_embeddings[sent_idx])
+            sent_idx += 1
+        if idx % args.step == 0:
+            print(f'Conversations: {idx}, Sentences embedded: {sent_idx}')
+        if args.streaming:
+            if idx == 1:
+                pickle.dump(conversation_embeddings, open(output_path, 'wb'))
+            else:
+                pickle.dump(conversation_embeddings, open(output_path, 'ab'))
+        sentence_embeddings += [conversation_embeddings]
+    print(f'Conversations: {idx}, Sentences embedded: {sent_idx}')
+    if not args.streaming:
+        pickle.dump(sentence_embeddings, open(output_path, 'wb'))
 
