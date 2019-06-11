@@ -1,10 +1,10 @@
 # InferSent
 
-*InferSent* is a *sentence embeddings* method that provides semantic representations for English sentences. It is trained on natural language inference data and generalizes well to many different tasks.
-
-We provide our pre-trained English sentence encoder [our paper](https://arxiv.org/abs/1705.02364) and our [SentEval](https://github.com/facebookresearch/SentEval) evaluation toolkit.
-
-**Recent changes**: Added infersent2 model trained on fastText vectors and added max-pool option.
+**InferSent** ([code](https://github.com/facebookresearch/InferSent), [paper](https://arxiv.org/abs/1705.02364)) is a 
+*sentence embeddings* method that provides semantic representations for English sentences.
+ It is trained on natural language inference data and generalizes well to many different tasks. This module is heavily 
+ based on [**the original implementation of InferSent**](https://github.com/facebookresearch/InferSent), but also 
+ includes new API classes for exporting InferSent embeddings for input datasets/textual prompts.
 
 ## Dependencies
 
@@ -15,33 +15,30 @@ This code is written in python. Dependencies include:
 * NLTK >= 3
 
 ## Download datasets
-To get SNLI and MultiNLI, run (in dataset/):
+To get SNLI and MultiNLI, run:
 ```bash
+cd dataset
 ./get_data.bash
 ```
 This will download and preprocess SNLI/MultiNLI datasets. For MacOS, you may have to use *p7zip* instead of *unzip*.
 
 
-Download [GloVe](https://nlp.stanford.edu/projects/glove/) (V1) or [fastText](https://fasttext.cc/docs/en/english-vectors.html) (V2) vectors:
+Download [GloVe](https://nlp.stanford.edu/projects/glove/):
 ```bash
 mkdir dataset/GloVe
 curl -Lo dataset/GloVe/glove.840B.300d.zip http://nlp.stanford.edu/data/glove.840B.300d.zip
 unzip dataset/GloVe/glove.840B.300d.zip -d dataset/GloVe/
-mkdir dataset/fastText
-curl -Lo dataset/fastText/crawl-300d-2M.vec.zip https://dl.fbaipublicfiles.com/fasttext/vectors-english/crawl-300d-2M-subword.zip
-unzip dataset/fastText/crawl-300d-2M.vec.zip -d dataset/fastText/
 ```
 
-## Use our sentence encoder
-We provide a simple interface to encode English sentences. **See [**encoder/demo.ipynb**](https://github.com/facebookresearch/InferSent/blob/master/encoder/demo.ipynb)
+## Use the pre-trained sentence encoder
+We provide a simple interface to encode English sentences. **See [**encoder/demo.ipynb**](https://github.com/natashamjaques/neural_chat/tree/master/inferSent/encoder/demo.ipynb)
 for a practical example.** Get started with the following steps:
 
-*0.0) Download our InferSent models (V1 trained with GloVe, V2 trained with fastText)[147MB]:*
+*0.0) Download the InferSent models (trained with GloVe) [2.18GB]:*
 ```bash
 curl -Lo encoder/infersent1.pickle https://dl.fbaipublicfiles.com/infersent/infersent1.pkl
-curl -Lo encoder/infersent2.pickle https://dl.fbaipublicfiles.com/infersent/infersent2.pkl
 ```
-Note that infersent1 is trained with GloVe (which have been trained on text preprocessed with the PTB tokenizer) and infersent2 is trained with fastText (which have been trained on text preprocessed with the MOSES tokenizer). The latter also removes the padding of zeros with max-pooling which was inconvenient when embedding sentences outside of their batches.
+Note that infersent1 is trained with GloVe (which have been trained on text preprocessed with the PTB tokenizer).
 
 *0.1) Make sure you have the NLTK tokenizer by running the following once:*
 ```python
@@ -49,10 +46,10 @@ import nltk
 nltk.download('punkt')
 ```
 
-*1) [Load our pre-trained model](https://github.com/facebookresearch/InferSent/blob/master/encoder/demo.ipynb) (in encoder/):*
+*1) [Load the pre-trained model](https://github.com/natashamjaques/neural_chat/tree/master/inferSent/encoder/demo.ipynb) (in encoder/):*
 ```python
 from models import InferSent
-V = 2
+V = 1
 MODEL_PATH = 'encoder/infersent%s.pkl' % V
 params_model = {'bsize': 64, 'word_emb_dim': 300, 'enc_lstm_dim': 2048,
                 'pool_type': 'max', 'dpout_model': 0.0, 'version': V}
@@ -62,7 +59,7 @@ infersent.load_state_dict(torch.load(MODEL_PATH))
 
 *2) Set word vector path for the model:*
 ```python
-W2V_PATH = 'fastText/crawl-300d-2M.vec'
+W2V_PATH = '../dataset/GloVe/glove.840B.300d.txt'
 infersent.set_w2v_path(W2V_PATH)
 ```
 
@@ -85,29 +82,10 @@ We provide a function to visualize the importance of each word in the encoding o
 ```python
 infersent.visualize('A man plays an instrument.', tokenize=True)
 ```
-![Model](https://dl.fbaipublicfiles.com/infersent/visualization.png)
-
-
-## Train model on Natural Language Inference (SNLI)
-To reproduce our results on [SNLI](https://nlp.stanford.edu/projects/snli/), run:
-```bash
-python train_nli.py --word_emb_path '<path to word embeddings>'
-```
-You should obtain a dev accuracy of 85 and a test accuracy of **[84.5](https://nlp.stanford.edu/projects/snli/)** with the default setting.
-
-## Evaluate the encoder on transfer tasks
-To evaluate the model on transfer tasks, see [SentEval](https://github.com/facebookresearch/SentEval/tree/master/examples). Be mindful to choose the same tokenization used for training the encoder. You should obtain the following test results for the baselines and the InferSent models:
-
-Model | MR | CR | SUBJ | MPQA | STS14 | [STS Benchmark](http://ixa2.si.ehu.es/stswiki/index.php/STSbenchmark#Results) | SICK Relatedness | SICK Entailment | SST | TREC | MRPC
-:---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---:
-`InferSent1` | **81.1** | **86.3** | 92.4 | **90.2** | **.68/.65** | 75.8/75.5 | 0.884 | 86.1 | **84.6** | 88.2 | **76.2**/83.1
-`InferSent2` | 79.7 | 84.2 | 92.7 | 89.4 | **.68/.66** | **78.4/78.4** | **0.888** | **86.3** | 84.3 | **90.8** | 76.0/**83.8**
-`SkipThought` | 79.4 | 83.1 | **93.7** | 89.3 | .44/.45 | 72.1/70.2| 0.858 | 79.5 | 82.9 | 88.4 | -
-`fastText-BoV` | 78.2 | 80.2 | 91.8 | 88.0 | .65/.63 | 70.2/68.3 | 0.823 | 78.9 | 82.3 | 83.4 | 74.4/82.4
 
 ## Reference
 
-Please consider citing [[1]](https://arxiv.org/abs/1705.02364) if you found this code useful.
+Please consider citing [[1]](https://arxiv.org/abs/1705.02364) if you found the InferSent module useful.
 
 ### Supervised Learning of Universal Sentence Representations from Natural Language Inference Data (EMNLP 2017)
 
