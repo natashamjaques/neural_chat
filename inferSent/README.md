@@ -85,25 +85,7 @@ infersent.visualize('A man plays an instrument.', tokenize=True)
 
 ## Reference
 
-Please consider citing [[1]](https://arxiv.org/abs/1705.02364) if you found the InferSent module useful.
-
-### Supervised Learning of Universal Sentence Representations from Natural Language Inference Data (EMNLP 2017)
-
 [1] A. Conneau, D. Kiela, H. Schwenk, L. Barrault, A. Bordes, [*Supervised Learning of Universal Sentence Representations from Natural Language Inference Data*](https://arxiv.org/abs/1705.02364)
-
-```
-@InProceedings{conneau-EtAl:2017:EMNLP2017,
-  author    = {Conneau, Alexis  and  Kiela, Douwe  and  Schwenk, Holger  and  Barrault, Lo\"{i}c  and  Bordes, Antoine},
-  title     = {Supervised Learning of Universal Sentence Representations from Natural Language Inference Data},
-  booktitle = {Proceedings of the 2017 Conference on Empirical Methods in Natural Language Processing},
-  month     = {September},
-  year      = {2017},
-  address   = {Copenhagen, Denmark},
-  publisher = {Association for Computational Linguistics},
-  pages     = {670--680},
-  url       = {https://www.aclweb.org/anthology/D17-1070}
-}
-```
 
 ### Related work
 * [J. R Kiros, Y. Zhu, R. Salakhutdinov, R. S. Zemel, A. Torralba, R. Urtasun, S. Fidler - SkipThought Vectors, NIPS 2015](https://arxiv.org/abs/1506.06726)
