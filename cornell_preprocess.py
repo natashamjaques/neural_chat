@@ -166,6 +166,7 @@ def pad_sentences(conversations, max_sentence_length=30, max_conversation_length
     sentence_length = all_sentence_length
     return sentences, sentence_length
 
+
 def load_conversations_cornell(cornell_dir):
     # Download and extract dialogs if necessary.
     prepare_cornell_data()
@@ -178,7 +179,6 @@ def load_conversations_cornell(cornell_dir):
     conversations = loadConversations(cornell_dir.joinpath("movie_conversations.txt"), lines)
     print('Number of conversations:', len(conversations))
     return conversations
-
 
 
 if __name__ == '__main__':

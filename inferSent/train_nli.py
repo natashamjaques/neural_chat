@@ -18,7 +18,7 @@ import torch.nn as nn
 
 from data import get_nli, get_batch, build_vocab
 from mutils import get_optimizer
-from models import NLINet
+from inferSent.encoder.models import NLINet
 
 
 parser = argparse.ArgumentParser(description='NLI training')

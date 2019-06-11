@@ -15,9 +15,11 @@ import time
 import torch
 import torch.nn as nn
 
+
 """
 BLSTM (max/mean) encoder
 """
+
 
 class InferSent(nn.Module):
 
@@ -298,6 +300,7 @@ class InferSent(nn.Module):
         plt.show()
 
         return output, idxs
+
 
 """
 BiGRU encoder (first/last hidden states)

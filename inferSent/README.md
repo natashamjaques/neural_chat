@@ -15,7 +15,7 @@ This code is written in python. Dependencies include:
 * NLTK >= 3
 
 ## Download datasets
-To get SNLI and MultiNLI, run:
+To get SNLI and MultiNLI [147MB], run:
 ```bash
 cd dataset
 ./get_data.bash
@@ -23,7 +23,7 @@ cd dataset
 This will download and preprocess SNLI/MultiNLI datasets. For MacOS, you may have to use *p7zip* instead of *unzip*.
 
 
-Download [GloVe](https://nlp.stanford.edu/projects/glove/) (V1) or [fastText](https://fasttext.cc/docs/en/english-vectors.html) (V2) vectors:
+Download [GloVe](https://nlp.stanford.edu/projects/glove/) [2.18GB] (V1) or [fastText](https://fasttext.cc/docs/en/english-vectors.html) [5.83GB] (V2) vectors:
 ```bash
 mkdir dataset/GloVe
 curl -Lo dataset/GloVe/glove.840B.300d.zip http://nlp.stanford.edu/data/glove.840B.300d.zip
