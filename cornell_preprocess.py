@@ -11,6 +11,7 @@ from zipfile import ZipFile
 from pathlib import Path
 from tqdm import tqdm
 from model.utils import Tokenizer, Vocab, PAD_TOKEN, SOS_TOKEN, EOS_TOKEN, pad_sentences
+from subprocess import call
 
 project_dir = Path(__file__).resolve().parent
 datasets_dir = project_dir.joinpath('datasets/')
@@ -273,4 +274,22 @@ if __name__ == '__main__':
             print('Vocabulary size: ', len(vocab))
             vocab.pickle(dataset_dir.joinpath('word2id.pkl'), dataset_dir.joinpath('id2word.pkl'))
 
-    print('Done!')
+    print('Done downloading and pre-processing dataset.')
+
+    print('Inferring TorchMoji encoding for dataset...')
+    torchmoji_export_script = os.path.join(os.path.join('torchMoji', 'api'), 'dataset_emojize.py')
+    for split_type in ['train', 'valid', 'test']:
+        filepath = os.path.join(os.path.join(dataset_dir, split_type), 'raw_sentences.pkl')
+        call(["python", torchmoji_export_script, f'--filepath={filepath}'])
+    print('Done exporting TorchMoji embedding.')
+
+    print('Inferring InferSent encoding for dataset...')
+    infersent_export_script = os.path.join(os.path.join('inferSent', 'api'), 'export_dataset_embeddings.py')
+    for split_type in ['train', 'valid', 'test']:
+        filepath = os.path.join(os.path.join(dataset_dir, split_type), 'raw_sentences.pkl')
+        call(["python", infersent_export_script, f'--filepath={filepath}'])
+    infersent_reduction_script = os.path.join(os.path.join('inferSent', 'api'), 'reduce_embeddings_dimension.py')
+    call(["python", infersent_reduction_script, f'--dataset={dataset_dir} --savepca --exportembeddings'])
+    print('Done exporting InferSent embedding.')
+
+    print('Successfully completed!')
