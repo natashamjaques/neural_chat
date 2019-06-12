@@ -19,6 +19,7 @@ cornell_dir = datasets_dir.joinpath('cornell/')
 # Tokenizer
 tokenizer = Tokenizer('spacy')
 
+
 def prepare_cornell_data():
     """Download and unpack dialogs"""
 
@@ -44,62 +45,64 @@ def prepare_cornell_data():
         print('Cornell Data prepared!')
 
 
-def loadLines(fileName,
-              fields=["lineID", "characterID", "movieID", "character", "text"],
-              delimiter=" +++$+++ "):
+def load_lines(file_name,
+               fields=["lineID", "characterID", "movieID", "character", "text"],
+               delimiter=" +++$+++ "):
     """
     Args:
-        fileName (str): file to load
-        field (set<str>): fields to extract
+        file_name (str): file to load
+        fields (set<str>): fields to extract
+        delimiter (str): delimiter string
     Return:
         dict<dict<str>>: the extracted fields for each line
     """
     lines = {}
 
-    with open(fileName, 'r', encoding='iso-8859-1') as f:
+    with open(file_name, 'r', encoding='iso-8859-1') as f:
         for line in f:
             values = line.split(delimiter)
 
             # Extract fields
-            lineObj = {}
+            line_obj = {}
             for i, field in enumerate(fields):
-                lineObj[field] = values[i]
+                line_obj[field] = values[i]
 
-            lines[lineObj['lineID']] = lineObj
+            lines[line_obj['lineID']] = line_obj
 
     return lines
 
 
-def loadConversations(fileName, lines,
-                      fields=["character1ID", "character2ID", "movieID", "utteranceIDs"],
-                      delimiter=" +++$+++ "):
+def load_conversations(file_name, lines,
+                       fields=["character1ID", "character2ID", "movieID", "utteranceIDs"],
+                       delimiter=" +++$+++ "):
     """
     Args:
-        fileName (str): file to load
-        field (set<str>): fields to extract
+        file_name (str): file to load
+        fields (set<str>): fields to extract
+        delimiter (str): delimiter string
     Return:
         dict<dict<str>>: the extracted fields for each line
     """
     conversations = []
 
-    with open(fileName, 'r', encoding='iso-8859-1') as f:
+    with open(file_name, 'r', encoding='iso-8859-1') as f:
         for line in f:
             values = line.split(delimiter)
 
             # Extract fields
-            convObj = {}
+            conv_obj = {}
             for i, field in enumerate(fields):
-                convObj[field] = values[i]
+                conv_obj[field] = values[i]
 
-            # Convert string to list (convObj["utteranceIDs"] == "['L598485', 'L598486', ...]")
-            lineIds = eval(convObj["utteranceIDs"])
+            # Convert string to list (conv_obj["utteranceIDs"] == "['L598485', 'L598486', ...]")
+            line_ids = eval(conv_obj["utteranceIDs"])
 
             # Reassemble lines
-            convObj["lines"] = []
-            for lineId in lineIds:
-                convObj["lines"].append(lines[lineId])
+            conv_obj["lines"] = []
+            for line_id in line_ids:
+                conv_obj["lines"].append(lines[line_id])
 
-            conversations.append(convObj)
+            conversations.append(conv_obj)
 
     return conversations
 
@@ -155,7 +158,7 @@ def pad_sentences(conversations, max_sentence_length=30, max_conversation_length
     for conversation in conversations:
         if len(conversation) > max_conversation_length:
             conversation = conversation[:max_conversation_length]
-        sentence_length = [min(len(sentence) + 1, max_sentence_length) # +1 for EOS token
+        sentence_length = [min(len(sentence) + 1, max_sentence_length)  # +1 for EOS token
                            for sentence in conversation]
         all_sentence_length.append(sentence_length)
 
@@ -172,11 +175,11 @@ def load_conversations_cornell(cornell_dir):
     prepare_cornell_data()
 
     print("Loading lines")
-    lines = loadLines(cornell_dir.joinpath("movie_lines.txt"))
+    lines = load_lines(cornell_dir.joinpath("movie_lines.txt"))
     print('Number of lines:', len(lines))
 
     print("Loading conversations...")
-    conversations = loadConversations(cornell_dir.joinpath("movie_conversations.txt"), lines)
+    conversations = load_conversations(cornell_dir.joinpath("movie_conversations.txt"), lines)
     print('Number of conversations:', len(conversations))
     return conversations
 
@@ -235,15 +238,16 @@ if __name__ == '__main__':
         split_data_dir.mkdir(exist_ok=True)
 
         print(f'Tokenize.. (n_workers={n_workers})')
+
         def _tokenize_conversation(conv):
             return tokenize_conversation(conv['lines'])
+
         with Pool(n_workers) as pool:
             conversations = list(tqdm(pool.imap(_tokenize_conversation, conv_objects),
                                      total=len(conv_objects)))
 
         conversation_length = [min(len(conv['lines']), max_conv_len)
                                for conv in conv_objects]
-
 
         raw_sentences = [[line['text'] for line in conv['lines'][0:min(len(conv['lines']), max_conv_len)]]
                          for conv in conv_objects]
