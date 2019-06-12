@@ -44,9 +44,10 @@ if __name__ == "__main__":
     argparser.add_argument('--enc_lstm_dim', type=int, default=2048, help="Dimension of LSTM")
 
     args = argparser.parse_args()
-    MODEL_PATH = os.path.join('encoder', f'infersent{args.version}.pickle')
+    infersent_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    MODEL_PATH = os.path.join(os.path.join(infersent_dir, 'encoder'), f'infersent{args.version}.pickle')
     model = load_infersent_model(MODEL_PATH, bsize=args.bsize, word_emb_dim=args.word_emb_dim,
-                                 enc_lstm_dim=args.word_emb_dim, version=args.version)
+                                 enc_lstm_dim=args.enc_lstm_dim, version=args.version)
 
     sentence_embeddings = []
     prefix = os.path.dirname(args.filepath)
