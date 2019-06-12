@@ -1,7 +1,7 @@
 # Neural Chat
 [PyTorch 0.4](https://github.com/pytorch/pytorch) Implementation of Neural Chat ([Approximating Interactive Human Evaluation with Self-Play for Open-Domain Dialog Systems](https://arxiv.org/abs/), [Way Off-Policy Batch Deep Reinforcement Learning of Implicit Human Preferences in Dialog](https://arxiv.org/abs/)). You can interact with the models here: http://neural.chat. 
 
-This code is inspired by and built off of "A Hierarchical Latent Structure for Variational Conversation Modeling" ([code](), [paper](https://arxiv.org/abs/1804.03424), [Presentation](https://vimeo.com/277671819)). 
+This code is inspired by and built off of "A Hierarchical Latent Structure for Variational Conversation Modeling" ([code](https://github.com/ctr4si/A-Hierarchical-Latent-Structure-for-Variational-Conversation-Modeling), [paper](https://arxiv.org/abs/1804.03424), [Presentation](https://vimeo.com/277671819)). 
 
 ## Prerequisites
 This section includes installation of required libraries, and downloading of pre-trained models.
@@ -25,11 +25,11 @@ Download [GloVe](https://nlp.stanford.edu/projects/glove/) [2.18GB] (V1) or [fas
 ```bash
 mkdir inferSent/dataset/GloVe
 curl -Lo inferSent/dataset/GloVe/glove.840B.300d.zip http://nlp.stanford.edu/data/glove.840B.300d.zip
-unzip inferSent/dataset/GloVe/glove.840B.300d.zip -d dataset/GloVe/
+unzip inferSent/dataset/GloVe/glove.840B.300d.zip -d inferSent/dataset/GloVe/
 
 mkdir inferSent/dataset/fastText
 curl -Lo inferSent/dataset/fastText/crawl-300d-2M.vec.zip https://dl.fbaipublicfiles.com/fasttext/vectors-english/crawl-300d-2M-subword.zip
-unzip inferSent/dataset/fastText/crawl-300d-2M.vec.zip -d dataset/fastText/
+unzip inferSent/dataset/fastText/crawl-300d-2M.vec.zip -d inferSent/dataset/fastText/
 ```
 
 Download the pre-trained InferSent models (V1 trained with GloVe, V2 trained with fastText) [154MB each]:
@@ -49,7 +49,7 @@ python torchMoji/scripts/download_weights.py
 ```
 
 ## Download & Preprocess data
-Following scripts will
+The following scripts will:
 
 1. Create directories `./datasets/cornell/` and `./datasets/ubuntu/` respectively.
 
@@ -119,14 +119,26 @@ python eval_embed.py --model=<model> --checkpoint=<path_to_your_checkpoint>
 
 
 ## Reference
-
-If you use this code or dataset as part of any published research, please refer the following paper.
+If you use this code or the released Reddit dataset as part of any published research, please reference the following papers:
 
 ```
-@inproceedings{VHCR:2018:NAACL,
-    author    = {Yookoon Park and Jaemin Cho and Gunhee Kim},
-    title     = "{A Hierarchical Latent Structure for Variational Conversation Modeling}",
-    booktitle = {NAACL},
-    year      = 2018
-    }
+@article{ghandeharioun2019approximating,
+  title={Approximating Interactive Human Evaluation with Self-Play for Open-Domain Dialog Systems},
+  author={Ghandeharioun, Asma and Shen, Judy and Jaques, Natasha and Ferguson, Craig and Jones, Noah, and Lapedriza, Agata and Picard, Rosalind},
+  journal={arXiv preprint arXiv:},
+  year={2019}
+}
 ```
+
+```
+@article{jaques2019way,
+  title={Way Off-Policy Batch Deep Reinforcement Learning of Implicit Human Preferences in Dialog},
+  author={Jaques, Natasha and Ghandeharioun, Asma and Shen, Judy and Ferguson, Craig and Jones, Noah, and Lapedriza, Agata and Gu, Shixiang and Picard, Rosalind},
+  journal={arXiv preprint arXiv:},
+  year={2019}
+}
+```
+
+
+### Related work
+* Park, Y., Cho, J., & Kim, G. (2018, June). [*A Hierarchical Latent Structure for Variational Conversation Modeling*](https://www.aclweb.org/anthology/N18-1162). In Proceedings of the 2018 Conference of the North American Chapter of the Association for Computational Linguistics: Human Language Technologies, Volume 1 (Long Papers) (pp. 1792-1801).
