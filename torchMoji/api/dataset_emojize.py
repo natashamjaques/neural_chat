@@ -1,9 +1,6 @@
 # -*- coding: utf-8 -*-
 
-""" Uses torchMoji to predict emojis from a dataset.
-    Saves the softmax outputs to a file.
-    Prints first 10 sentences and their top 5 emojis as example.
-"""
+""" Uses torchMoji to predict emojis for a dataset and save the softmax outputs to a file. """
 
 from __future__ import print_function, division, unicode_literals
 import json
@@ -12,6 +9,7 @@ import argparse
 import numpy as np
 import emoji
 import pickle
+import os
 
 from torchMoji.torchmoji.sentence_tokenizer import SentenceTokenizer
 from torchMoji.torchmoji.model_def import torchmoji_emojis
@@ -47,8 +45,8 @@ if __name__ == "__main__":
     args = argparser.parse_args()
     sentence_probs = []
     retokenized_sentences = []
-    output_path = args.filepath[:args.filepath.rfind('/')+1] + 'sentence_emojis.pkl'
-    retokenized_sentences_output_path = args.filepath[:args.filepath.rfind('/')+1] + 'retokenized_sentences.pkl'
+    output_path = os.path.join(os.path.dirname(args.filepath), 'sentence_emojis.pkl')
+    retokenized_sentences_output_path = os.path.join(os.path.dirname(args.filepath), 'retokenized_sentences.pkl')
 
     # Tokenizing using dictionary
     with open(VOCAB_PATH, 'r') as f:
@@ -87,8 +85,6 @@ if __name__ == "__main__":
 
         if idx % args.step == 0:
             print('Step: ', idx)
-            # pickle.dump(sentence_probs, open(output_path, 'wb'))
-            # pickle.dump(retokenized_sentences, open(retokenized_sentences_output_path, 'wb'))
         sentence_probs += [conversation_probs]
         retokenized_sentences += [conversation_retokenized]
     print('Step: ', idx)

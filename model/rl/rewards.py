@@ -9,17 +9,15 @@ computed.
 Note that rewards should be normalized for best results.
 """
 
-from torchMoji.examples.botmoji import Botmoji
+from torchMoji.api.botmoji import Botmoji, EMOJIS
 from inferSent.api.botsent import Botsent
 
 import replay_buffer
 
 import argparse
 import os
-import sys
 import numpy as np
 import pandas as pd
-from numpy.linalg import norm
 from pathlib import Path
 
 from model.utils import embedding_metric
@@ -27,25 +25,6 @@ import gensim
 ROOT_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 word2vec_path = os.path.join(ROOT_DIR, "datasets/GoogleNews-vectors-negative300.bin")
 import nltk
-
-
-def _get_emojis():
-    # All emojis in the order returned by deepmoji
-    EMOJIS = ":joy: :unamused: :weary: :sob: :heart_eyes: :pensive: " + \
-             ":ok_hand: :blush: :heart: :smirk: :grin: :notes: :flushed: " + \
-             ":100: :sleeping: :relieved: :relaxed: :raised_hands: " + \
-             ":two_hearts: :expressionless: :sweat_smile: :pray: " + \
-             ":confused: :kissing_heart: :heartbeat: :neutral_face: " + \
-             ":information_desk_person: :disappointed: :see_no_evil: " + \
-             ":tired_face: :v: :sunglasses: :rage: :thumbsup: :cry: " + \
-             ":sleepy: :yum: :triumph: :hand: :mask: :clap: :eyes: :gun: " + \
-             ":persevere: :smiling_imp: :sweat: :broken_heart: " + \
-             ":yellow_heart: :musical_note: :speak_no_evil: :wink: :skull: " + \
-             ":confounded: :smile: :stuck_out_tongue_winking_eye: :angry: " + \
-             ":no_good: :muscle: :facepunch: :purple_heart: " + \
-             ":sparkling_heart: :blue_heart: :grimacing: :sparkles:"
-    EMOJIS = EMOJIS.split(' ')
-    return EMOJIS
 
 
 def _get_emojis_to_rewards_dict():
@@ -82,7 +61,6 @@ def _get_emojis_to_rewards_dict():
 
 
 def _get_reward_multiplier():
-    EMOJIS = _get_emojis()
     emojis_to_rewards = _get_emojis_to_rewards_dict()
     reward_multiplier = np.zeros(len(EMOJIS))
     for emoji, reward_val in emojis_to_rewards.items():

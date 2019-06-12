@@ -1,7 +1,13 @@
-from itertools import cycle
-import getpass
+from torchMoji.api.botmoji import Botmoji
+from inferSent.api.botsent import Botsent
+
+import model.models as models
+from model.layers import masked_cross_entropy, cross_entropy_soft_targets, mean_squared_error
+from model.utils import Tokenizer, to_var, time_desc_decorator, TensorboardWriter, embedding_metric, pad_tokens, \
+    UNK_ID, EOS_ID, detokenize, convert_old_checkpoint_format
+from model.utils.novel_metrics import novel_metrics
+
 import os
-import sys
 import numpy as np
 import pandas as pd
 import torch
@@ -9,23 +15,11 @@ import torch.nn as nn
 from pathlib import Path
 from tqdm import tqdm
 from math import isnan
-import re
-import math
-import pickle
 import gensim
 import re
 from nltk.tokenize.treebank import TreebankWordDetokenizer as Detok
 
-import model.models as models
-from model.layers import masked_cross_entropy, cross_entropy_soft_targets, mean_squared_error
-from model.utils import Tokenizer, to_var, time_desc_decorator, TensorboardWriter, pad_and_pack, normal_kl_div, to_bow, \
-    bag_of_words_loss, normal_kl_div, embedding_metric, pad_tokens, UNK_ID, EOS_ID, detokenize, \
-    convert_old_checkpoint_format
-from model.utils.novel_metrics import novel_metrics
-
 ROOT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-from torchMoji.examples.botmoji import Botmoji
-from inferSent.api.botsent import Botsent
 
 word2vec_path = os.path.join(ROOT_DIR, "datasets/GoogleNews-vectors-negative300.bin")
 

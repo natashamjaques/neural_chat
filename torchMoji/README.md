@@ -1,17 +1,13 @@
-### ------ Update September 2018 ------
-It's been a year since TorchMoji and DeepMoji were released. We're trying to understand how it's being used such that we can make improvements and design better models in the future. 
-
-You can help us achieve this by answering this [4-question Google Form](https://docs.google.com/forms/d/e/1FAIpQLSe1h4NSQD30YM8dsbJQEnki-02_9KVQD34qgP9to0bwAHBvBA/viewform "DeepMoji Google Form"). Thanks for your support!
-
 # 😇 TorchMoji
 
-> **Read our blog post about the implementation process [here](https://medium.com/huggingface/understanding-emotions-from-keras-to-pytorch-3ccb61d5a983).**
-
-TorchMoji is a [pyTorch](http://pytorch.org/) implementation of the [DeepMoji](https://github.com/bfelbo/DeepMoji) model developped by Bjarke Felbo, Alan Mislove, Anders Søgaard, Iyad Rahwan and Sune Lehmann.
+This module is heavily based on TorchMoji ([code](https://github.com/huggingface/torchMoji)) which is a [pyTorch](http://pytorch.org/) implementation of the [DeepMoji](https://github.com/bfelbo/DeepMoji) model developped by Bjarke Felbo, Alan Mislove, Anders Søgaard, Iyad Rahwan and Sune Lehmann. Torchmoji has been implemented by the [huggingface company](https://huggingface.co/).
+Here, we have added new API functions to more seamlessly interact with torhcmoji models.
 
 This model trained on 1.2 billion tweets with emojis to understand how language is used to express emotions. Through transfer learning the model can obtain state-of-the-art performance on many emotion-related text modeling tasks.
 
 Try the online demo of DeepMoji [http://deepmoji.mit.edu](http://deepmoji.mit.edu/)! See the [paper](https://arxiv.org/abs/1708.00524), [blog post](https://medium.com/@bjarkefelbo/what-can-we-learn-from-emojis-6beb165a5ea0) or [FAQ](https://www.media.mit.edu/projects/deepmoji/overview/) for more details.
+
+**Read the original blog post about the implementation process of TorchMoji [here](https://medium.com/huggingface/understanding-emotions-from-keras-to-pytorch-3ccb61d5a983).**
 
 ## Overview
 * [torchmoji/](torchmoji) contains all the underlying code needed to convert a dataset to the vocabulary and use the model.
@@ -20,6 +16,7 @@ Try the online demo of DeepMoji [http://deepmoji.mit.edu](http://deepmoji.mit.ed
 * [model/](model) contains the pretrained model and vocabulary.
 * [data/](data) contains raw and processed datasets that we include in this repository for testing.
 * [tests/](tests) contains unit tests for the codebase.
+* [api/](api) Our added scripts for interacting with torchmoji.
 
 To start out with, have a look inside the [examples/](examples) directory. See [score_texts_emojis.py](examples/score_texts_emojis.py) for how to use DeepMoji to extract emoji predictions, [encode_texts.py](examples/encode_texts.py) for how to convert text into 2304-dimensional emotional feature vectors or [finetune_youtube_last.py](examples/finetune_youtube_last.py) for how to use the model for transfer learning on a new dataset.
 
@@ -69,21 +66,10 @@ nosetests -v -a '!slow'
 ## Disclaimer
 This code has been tested to work with Python 2.7 and 3.5 on Ubuntu 16.04 and macOS Sierra machines. It has not been optimized for efficiency, but should be fast enough for most purposes. We do not give any guarantees that there are no bugs - use the code on your own responsibility!
 
-## Contributions
-We welcome pull requests if you feel like something could be improved. You can also greatly help us by telling us how you felt when writing your most recent tweets. Just click [here](http://deepmoji.mit.edu/contribute/) to contribute.
 
 ## License
 This code and the pretrained model is licensed under the MIT license.
 
-## Benchmark datasets
-The benchmark datasets are uploaded to this repository for convenience purposes only. They were not released by us and we do not claim any rights on them. Use the datasets at your responsibility and make sure you fulfill the licenses that they were released with. If you use any of the benchmark datasets please consider citing the original authors.
+## Reference
 
-## Citation
-```
-@inproceedings{felbo2017,
-  title={Using millions of emoji occurrences to learn any-domain representations for detecting sentiment, emotion and sarcasm},
-  author={Felbo, Bjarke and Mislove, Alan and S{\o}gaard, Anders and Rahwan, Iyad and Lehmann, Sune},
-  booktitle={Conference on Empirical Methods in Natural Language Processing (EMNLP)},
-  year={2017}
-}
-```
+[1] Felbo, B., Mislove, A., Søgaard, A., Rahwan, I., & Lehmann, S. (2017, September). [*Using millions of emoji occurrences to learn any-domain representations for detecting sentiment, emotion and sarcasm*](https://arxiv.org/pdf/1708.00524.pdf). In Proceedings of the 2017 Conference on Empirical Methods in Natural Language Processing (pp. 1615-1625).
