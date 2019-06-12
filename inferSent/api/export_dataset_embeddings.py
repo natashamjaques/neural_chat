@@ -15,10 +15,12 @@ def load_infersent_model(model_path, bsize=64, word_emb_dim=300, enc_lstm_dim=20
     model = InferSent(params_model)
     model.load_state_dict(torch.load(model_path))
 
+    infersent_dataset_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'dataset')
+
     if version == 1:
-        W2V_PATH = os.path.join(os.path.join('dataset', 'GloVe'), 'glove.840B.300d.txt')
+        W2V_PATH = os.path.join(os.path.join(infersent_dataset_dir, 'GloVe'), 'glove.840B.300d.txt')
     elif version == 2:
-        W2V_PATH = os.path.join(os.path.join('dataset', 'fastText'), 'crawl-300d-2M-subword.vec')
+        W2V_PATH = os.path.join(os.path.join(infersent_dataset_dir, 'fastText'), 'crawl-300d-2M-subword.vec')
     model.set_w2v_path(W2V_PATH)
     model.build_vocab_k_words(K=100000)
     return model
