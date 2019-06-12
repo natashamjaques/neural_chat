@@ -1,10 +1,10 @@
 # Neural Chat
 [PyTorch 0.4](https://github.com/pytorch/pytorch) Implementation of Neural Chat ([Approximating Interactive Human Evaluation with Self-Play for Open-Domain Dialog Systems](https://arxiv.org/abs/), [Way Off-Policy Batch Deep Reinforcement Learning of Implicit Human Preferences in Dialog](https://arxiv.org/abs/)). You can interact with the models here: http://neural.chat. 
 
-This code is inspired by and built off of "A Hierarchical Latent Structure for Variational Conversation Modeling" ([code](https://github.com/ctr4si/A-Hierarchical-Latent-Structure-for-Variational-Conversation-Modeling), [paper](https://arxiv.org/abs/1804.03424), [Presentation](https://vimeo.com/277671819)). 
+This code is inspired by and built off of "A Hierarchical Latent Structure for Variational Conversation Modeling" ([code](https://github.com/ctr4si/A-Hierarchical-Latent-Structure-for-Variational-Conversation-Modeling), [paper](https://arxiv.org/abs/1804.03424), [presentation](https://vimeo.com/277671819)). 
 
 ## Prerequisites
-This section includes installation of required libraries, and downloading of pre-trained models.
+This section includes installation of required libraries, and downloading pre-trained models.
 
 ### Installation
 Install Python packages
