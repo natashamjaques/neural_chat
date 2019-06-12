@@ -25,7 +25,7 @@ from model.utils.novel_metrics import novel_metrics
 
 ROOT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 from torchMoji.examples.botmoji import Botmoji
-from inferSent.botsent import Botsent
+from inferSent.api.botsent import Botsent
 
 word2vec_path = os.path.join(ROOT_DIR, "datasets/GoogleNews-vectors-negative300.bin")
 

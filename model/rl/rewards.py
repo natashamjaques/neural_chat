@@ -8,6 +8,12 @@ computed.
 
 Note that rewards should be normalized for best results.
 """
+
+from torchMoji.examples.botmoji import Botmoji
+from inferSent.api.botsent import Botsent
+
+import replay_buffer
+
 import argparse
 import os
 import sys
@@ -21,11 +27,6 @@ import gensim
 ROOT_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 word2vec_path = os.path.join(ROOT_DIR, "datasets/GoogleNews-vectors-negative300.bin")
 import nltk
-
-import replay_buffer
-
-from torchMoji.examples.botmoji import Botmoji
-from inferSent.botsent import Botsent
 
 
 def _get_emojis():
