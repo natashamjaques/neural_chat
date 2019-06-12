@@ -3,6 +3,11 @@
 """ Uses torchMoji to predict emojis for a dataset and save the softmax outputs to a file. """
 
 from __future__ import print_function, division, unicode_literals
+
+from torchMoji.torchmoji.sentence_tokenizer import SentenceTokenizer
+from torchMoji.torchmoji.model_def import torchmoji_emojis
+from torchMoji.torchmoji.global_variables import PRETRAINED_PATH, VOCAB_PATH
+
 import json
 import argparse
 
@@ -11,9 +16,6 @@ import emoji
 import pickle
 import os
 
-from torchMoji.torchmoji.sentence_tokenizer import SentenceTokenizer
-from torchMoji.torchmoji.model_def import torchmoji_emojis
-from torchMoji.torchmoji.global_variables import PRETRAINED_PATH, VOCAB_PATH
 
 # Emoji map in emoji_overview.png
 EMOJIS = ":joy: :unamused: :weary: :sob: :heart_eyes: \
