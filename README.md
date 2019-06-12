@@ -1,8 +1,12 @@
-# Variational Hierarchical Conversation RNN (VHCR)
-[PyTorch 0.4](https://github.com/pytorch/pytorch) Implementation of ["A Hierarchical Latent Structure for Variational Conversation Modeling"](https://arxiv.org/abs/1804.03424) (NAACL 2018 Oral)
-* [NAACL 2018 Oral Presentation Video](https://vimeo.com/277671819)
+# Neural Chat
+[PyTorch 0.4](https://github.com/pytorch/pytorch) Implementation of Neural Chat ([Approximating Interactive Human Evaluation with Self-Play for Open-Domain Dialog Systems](https://arxiv.org/abs/), [Way Off-Policy Batch Deep Reinforcement Learning of Implicit Human Preferences in Dialog](https://arxiv.org/abs/)). You can interact with the models here: http://neural.chat. 
+
+This code is inspired by and built off of "A Hierarchical Latent Structure for Variational Conversation Modeling" ([code](), [paper](https://arxiv.org/abs/1804.03424), [Presentation](https://vimeo.com/277671819)). 
 
 ## Prerequisites
+This section includes installation of required libraries, and downloading of pre-trained models.
+
+### Installation
 Install Python packages
 ```
 pip install -r requirements.txt
@@ -11,6 +15,37 @@ pip install -r requirements.txt
 Setup python path to include repo
 ```
 python setup.py develop
+```
+
+### InferSent Setup
+
+> For more information about InferSent module, see [here](https://github.com/natashamjaques/neural_chat/tree/master/inferSent).
+
+Download [GloVe](https://nlp.stanford.edu/projects/glove/) [2.18GB] (V1) or [fastText](https://fasttext.cc/docs/en/english-vectors.html) [5.83GB] (V2) vectors. We suggest using GloVe:
+```bash
+mkdir inferSent/dataset/GloVe
+curl -Lo inferSent/dataset/GloVe/glove.840B.300d.zip http://nlp.stanford.edu/data/glove.840B.300d.zip
+unzip inferSent/dataset/GloVe/glove.840B.300d.zip -d dataset/GloVe/
+
+mkdir inferSent/dataset/fastText
+curl -Lo inferSent/dataset/fastText/crawl-300d-2M.vec.zip https://dl.fbaipublicfiles.com/fasttext/vectors-english/crawl-300d-2M-subword.zip
+unzip inferSent/dataset/fastText/crawl-300d-2M.vec.zip -d dataset/fastText/
+```
+
+Download the pre-trained InferSent models (V1 trained with GloVe, V2 trained with fastText) [154MB each]:
+```bash
+curl -Lo inferSent/encoder/infersent1.pickle https://dl.fbaipublicfiles.com/infersent/infersent1.pkl
+curl -Lo inferSent/encoder/infersent2.pickle https://dl.fbaipublicfiles.com/infersent/infersent2.pkl
+```
+Note that infersent1 is trained with GloVe (which have been trained on text preprocessed with the PTB tokenizer) and infersent2 is trained with fastText (which have been trained on text preprocessed with the MOSES tokenizer). The latter also removes the padding of zeros with max-pooling which was inconvenient when embedding sentences outside of their batches.
+
+### TorchMoji Setup
+
+> For more information about TorchMoji module, see [here](https://github.com/natashamjaques/neural_chat/tree/master/torchMoji).
+
+Run the download script to downloads the pre-trained torchMoji weights [~85MB] from [here](https://www.dropbox.com/s/q8lax9ary32c7t9/pytorch_model.bin?dl=0) and put them in the `./torchMoji/model/` directory:
+```
+python torchMoji/scripts/download_weights.py
 ```
 
 ## Download & Preprocess data
@@ -38,13 +73,6 @@ python ubuntu_preprocess.py
     --max_vocab_size (maximum size of word vocabulary; default: 20000)
     --max_vocab_frequency (minimum frequency of word to be included in vocabulary; default: 5)
     --n_workers (number of workers for multiprocessing; default: os.cpu_count())
-```
-
-### Download pretrained deepmoji model
-
-```
-cd torchMoji
-python scripts/download_weights.py
 ```
 
 ## Training

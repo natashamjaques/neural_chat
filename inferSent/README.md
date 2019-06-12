@@ -5,13 +5,15 @@
  It is trained on natural language inference data and generalizes well to many different tasks. This module is heavily 
  based on [**the original implementation of InferSent**](https://github.com/facebookresearch/InferSent), but also 
  includes new API classes for exporting InferSent embeddings for input datasets/textual prompts.
+ 
+This document is only to provide further information about interacting with the InferSent module. 
+ **You do not need to take an further setup steps if you have successfully completed [this](https://github.com/natashamjaques/neural_chat#InferSent-Setup)**. 
 
 ## Dependencies
 
-This code is written in python. Dependencies include:
+The dependencies of this python module include:
 
-* Python 2/3
-* [Pytorch](http://pytorch.org/) (recent version)
+* [Pytorch](http://pytorch.org/)
 * NLTK >= 3
 
 ## Download datasets
@@ -22,29 +24,11 @@ cd dataset
 ```
 This will download and preprocess SNLI/MultiNLI datasets. For MacOS, you may have to use *p7zip* instead of *unzip*.
 
-
-Download [GloVe](https://nlp.stanford.edu/projects/glove/) [2.18GB] (V1) or [fastText](https://fasttext.cc/docs/en/english-vectors.html) [5.83GB] (V2) vectors:
-```bash
-mkdir dataset/GloVe
-curl -Lo dataset/GloVe/glove.840B.300d.zip http://nlp.stanford.edu/data/glove.840B.300d.zip
-unzip dataset/GloVe/glove.840B.300d.zip -d dataset/GloVe/
-mkdir dataset/fastText
-curl -Lo dataset/fastText/crawl-300d-2M.vec.zip https://dl.fbaipublicfiles.com/fasttext/vectors-english/crawl-300d-2M-subword.zip
-unzip dataset/fastText/crawl-300d-2M.vec.zip -d dataset/fastText/
-```
-
 ## Use the pre-trained sentence encoder
 We provide a simple interface to encode English sentences. **See [**encoder/demo.ipynb**](https://github.com/natashamjaques/neural_chat/tree/master/inferSent/encoder/demo.ipynb)
 for a practical example.** Get started with the following steps:
 
-*0.0) Download our InferSent models (V1 trained with GloVe, V2 trained with fastText)[2.18GB]:*
-```bash
-curl -Lo encoder/infersent1.pickle https://dl.fbaipublicfiles.com/infersent/infersent1.pkl
-curl -Lo encoder/infersent2.pickle https://dl.fbaipublicfiles.com/infersent/infersent2.pkl
-```
-Note that infersent1 is trained with GloVe (which have been trained on text preprocessed with the PTB tokenizer) and infersent2 is trained with fastText (which have been trained on text preprocessed with the MOSES tokenizer). The latter also removes the padding of zeros with max-pooling which was inconvenient when embedding sentences outside of their batches.
-
-*0.1) Make sure you have the NLTK tokenizer by running the following once:*
+*0) Make sure you have the NLTK tokenizer by running the following once:*
 ```python
 import nltk
 nltk.download('punkt')
