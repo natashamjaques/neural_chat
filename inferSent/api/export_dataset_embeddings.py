@@ -9,6 +9,21 @@ import argparse
 nltk.download('punkt')
 
 
+def load_infersent_model(model_path, bsize=64, word_emb_dim=300, enc_lstm_dim=2048, version=1):
+    params_model = {'bsize': bsize, 'word_emb_dim': word_emb_dim, 'enc_lstm_dim': enc_lstm_dim,
+                    'pool_type': 'max', 'dpout_model': 0.0, 'version': version}
+    model = InferSent(params_model)
+    model.load_state_dict(torch.load(model_path))
+
+    if version == 1:
+        W2V_PATH = os.path.join(os.path.join('dataset', 'GloVe'), 'glove.840B.300d.txt')
+    elif version == 2:
+        W2V_PATH = os.path.join(os.path.join('dataset', 'fastText'), 'crawl-300d-2M-subword.vec')
+    model.set_w2v_path(W2V_PATH)
+    model.build_vocab_k_words(K=100000)
+    return model
+
+
 if __name__ == "__main__":
     argparser = argparse.ArgumentParser()
     argparser.add_argument('--filepath', type=str,
@@ -28,18 +43,8 @@ if __name__ == "__main__":
 
     args = argparser.parse_args()
     MODEL_PATH = os.path.join('encoder', f'infersent{args.version}.pickle')
-    params_model = {'bsize': args.bsize, 'word_emb_dim': args.word_emb_dim, 'enc_lstm_dim': args.enc_lstm_dim,
-                    'pool_type': 'max', 'dpout_model': 0.0, 'version': args.version}
-
-    model = InferSent(params_model)
-    model.load_state_dict(torch.load(MODEL_PATH))
-
-    if args.version == 1:
-        W2V_PATH = os.path.join(os.path.join('dataset', 'GloVe'), 'glove.840B.300d.txt')
-    elif args.version == 2:
-        W2V_PATH = os.path.join(os.path.join('dataset', 'fastText'), 'crawl-300d-2M-subword.vec')
-    model.set_w2v_path(W2V_PATH)
-    model.build_vocab_k_words(K=100000)
+    model = load_infersent_model(MODEL_PATH, bsize=args.bsize, word_emb_dim=args.word_emb_dim,
+                                 enc_lstm_dim=args.word_emb_dim, version=args.version)
 
     sentence_embeddings = []
     prefix = os.path.dirname(args.filepath)
