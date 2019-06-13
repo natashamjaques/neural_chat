@@ -15,6 +15,7 @@ datasets/
 *.orig
 *.lprof
 .idea
+*.DS_Store
 
 # Remote edit
 *.ftpconfig
