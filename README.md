@@ -123,7 +123,17 @@ python model/train.py --data=reddit_casual --model=VHCR --emotion --infersent --
 
 ### Training Reinforcement Learning Models
 
-[To be completed]
+[This section needs work]
+
+First, calculate rewards offline:
+```
+python model/rl/rewards.py --raw --experience_path=<path_to_experience_csv_file> --save_path=<save_path>
+```
+
+Then, run:
+```
+python model/rl/run_rl.py -r 'reward_you' 'reward_what' -rw 2.0 1.5
+```
 
 ## Evaluation
 To evaluate the word perplexity:
@@ -150,8 +160,10 @@ python model/interact.py --debug --checkpoint=<path_to_your_checkpoint>
 ```
 
 ## Reference
-If you use this code or the released Reddit dataset as part of any published research, please reference the following papers:
+If you use this code or the released Reddit dataset as part of any published research, 
+please reference at least one of the following papers depending on your usage.
 
+For interactive evaluation, use of Reddit dataset, miscellaneous use-cases, refer to:
 ```
 @article{ghandeharioun2019approximating,
   title={Approximating Interactive Human Evaluation with Self-Play for Open-Domain Dialog Systems},
@@ -161,6 +173,7 @@ If you use this code or the released Reddit dataset as part of any published res
 }
 ```
 
+For reinforcement learning in dialog systems, refer to:
 ```
 @article{jaques2019way,
   title={Way Off-Policy Batch Deep Reinforcement Learning of Implicit Human Preferences in Dialog},
