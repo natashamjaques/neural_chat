@@ -57,12 +57,12 @@ The following scripts will:
 
 ### for [Reddit Casual Conversations Dataset](https://www.reddit.com/r/CasualConversation/)
 
-To download the pre-processed dataset, use:
+To download the pre-processed dataset [4.91GB], use:
 ```
 python dataset_preprocess.py --dataset=reddit_casual --shortcut
 ```
 
-Alternatively, if you'd like to download a smaller version, and do pre-processing steps on your end, use:
+Alternatively, if you'd like to download a smaller version [24.2MB], and do pre-processing steps on your end, use:
 ```
 python dataset_preprocess.py --dataset=reddit_casual
     --max_sentence_length (maximum number of words in sentence; default: 30)
@@ -74,12 +74,12 @@ python dataset_preprocess.py --dataset=reddit_casual
 
 ### for [Cornell Movie Dialogue Dataset](https://www.cs.cornell.edu/~cristian/Cornell_Movie-Dialogs_Corpus.html)
 
-To download the pre-processed dataset, use:
+To download the pre-processed dataset [3.62GB], use:
 ```
 python dataset_preprocess.py --dataset=cornell --shortcut
 ```
 
-Alternatively, if you'd like to download a smaller version, and do pre-processing steps on your end, use:
+Alternatively, if you'd like to download a smaller version [9.9MB], and do pre-processing steps on your end, use:
 ```
 python dataset_preprocess.py --dataset=reddit_casual
     --max_sentence_length (maximum number of words in sentence; default: 30)
