@@ -1,4 +1,4 @@
-# Preprocess cornell movie dialogs dataset
+# Download/Preprocess data-sets
 
 from multiprocessing import Pool
 import argparse
@@ -14,9 +14,9 @@ from model.utils import Tokenizer, Vocab, PAD_TOKEN, SOS_TOKEN, EOS_TOKEN, pad_s
 from subprocess import call
 
 project_dir = Path(__file__).resolve().parent
-datasets_dir = os.path.join(project_dir, 'datasets')
-cornell_dir = os.path.join(datasets_dir, 'cornell')
-reddit_casual_dir = os.path.join(datasets_dir, 'reddit_casual')
+datasets_dir = project_dir.joinpath('datasets')
+cornell_dir = datasets_dir.joinpath('cornell')
+reddit_casual_dir = datasets_dir.joinpath('reddit_casual')
 
 # Tokenizer
 tokenizer = Tokenizer('spacy')
@@ -26,14 +26,14 @@ def shortcut_download(dataset):
     """Download and unpack pre-processed dataset"""
 
     zip_url = f'https://affect.media.mit.edu/neural_chat/datasets/{dataset}_preprocessed.zip'
-    zipfile_dir = os.path.join(datasets_dir, dataset)
-    zipfile_path = os.path.join(datasets_dir, f'{dataset}.zip')
+    zipfile_dir = datasets_dir.joinpath(dataset)
+    zipfile_path = datasets_dir.joinpath(f'{dataset}.zip')
 
-    if not datasets_dir.exists():
-        datasets_dir.mkdir()
+    if not os.path.exists(datasets_dir):
+        os.makedirs(datasets_dir)
 
     # Prepare Dialog data
-    if not zipfile_dir.exists():
+    if not os.path.exists(zipfile_dir):
         print(f'Downloading {zip_url} to {zipfile_path}')
         urlretrieve(zip_url, zipfile_path)
         print(f'Successfully downloaded {zipfile_path}')
@@ -42,7 +42,7 @@ def shortcut_download(dataset):
         zip_ref.extractall(datasets_dir)
         zip_ref.close()
 
-        datasets_dir.joinpath(f'{dataset}_preprocessed').rename(zipfile_dir)
+        print(f'Successfully extracted {zipfile_path}')
 
     else:
         print('Directory already exists. Aborting download.')
@@ -54,11 +54,11 @@ def prepare_reddit_casual_data():
     zip_url = 'https://affect.media.mit.edu/neural_chat/datasets/reddit_casual.json.zip'
     zipfile_path = datasets_dir.joinpath('reddit_casual.json.zip')
 
-    if not datasets_dir.exists():
-        datasets_dir.mkdir()
+    if not os.path.exists(datasets_dir):
+        os.makedirs(datasets_dir)
 
     # Prepare Dialog data
-    if not reddit_casual_dir.exists():
+    if not os.path.exists(reddit_casual_dir):
         print(f'Downloading {zip_url} to {zipfile_path}')
         urlretrieve(zip_url, zipfile_path)
         print(f'Successfully downloaded {zipfile_path}')
@@ -66,6 +66,8 @@ def prepare_reddit_casual_data():
         zip_ref = ZipFile(zipfile_path, 'r')
         zip_ref.extractall(datasets_dir)
         zip_ref.close()
+
+        print(f'Successfully extracted {zipfile_path}')
 
     else:
         print('Reddit Casual data prepared!')
@@ -77,11 +79,11 @@ def prepare_cornell_data():
     zip_url = 'http://www.mpi-sws.org/~cristian/data/cornell_movie_dialogs_corpus.zip'
     zipfile_path = datasets_dir.joinpath('cornell.zip')
 
-    if not datasets_dir.exists():
-        datasets_dir.mkdir()
+    if not os.path.exists(datasets_dir):
+        os.makedirs(datasets_dir)
 
     # Prepare Dialog data
-    if not cornell_dir.exists():
+    if not os.path.exists(cornell_dir):
         print(f'Downloading {zip_url} to {zipfile_path}')
         urlretrieve(zip_url, zipfile_path)
         print(f'Successfully downloaded {zipfile_path}')
@@ -91,6 +93,8 @@ def prepare_cornell_data():
         zip_ref.close()
 
         datasets_dir.joinpath('cornell movie-dialogs corpus').rename(cornell_dir)
+
+        print(f'Successfully extracted {zipfile_path}')
 
     else:
         print('Cornell data prepared!')
