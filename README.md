@@ -57,7 +57,7 @@ The following scripts will:
 
 ### for [Reddit Casual Conversations Dataset](https://www.reddit.com/r/CasualConversation/)
 
-To download the pre-processed dataset [4.91GB], use:
+To download the pre-processed dataset [3.72GB], use:
 ```
 python dataset_preprocess.py --dataset=reddit_casual --shortcut
 ```
