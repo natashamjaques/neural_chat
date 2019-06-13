@@ -21,6 +21,30 @@ cornell_dir = datasets_dir.joinpath('cornell/')
 tokenizer = Tokenizer('spacy')
 
 
+def shortcut_download(dataset):
+    """Download and unpack pre-processed dataset"""
+
+    zip_url = f'https://affect.media.mit.edu/neural_chat/datasets/{dataset}.zip'
+    zipfile_dir = os.path.join(datasets_dir, dataset)
+    zipfile_path = os.path.join(datasets_dir, f'{dataset}.zip')
+
+    if not datasets_dir.exists():
+        datasets_dir.mkdir()
+
+    # Prepare Dialog data
+    if not zipfile_dir.exists():
+        print(f'Downloading {zip_url} to {zipfile_path}')
+        urlretrieve(zip_url, zipfile_path)
+        print(f'Successfully downloaded {zipfile_path}')
+
+        zip_ref = ZipFile(zipfile_path, 'r')
+        zip_ref.extractall(datasets_dir)
+        zip_ref.close()
+
+    else:
+        print('Directory already exists. Aborting download.')
+
+
 def prepare_cornell_data():
     """Download and unpack dialogs"""
 
@@ -205,8 +229,12 @@ if __name__ == '__main__':
     # Multiprocess
     parser.add_argument('--n_workers', type=int, default=os.cpu_count())
 
-    # input dataset
+    # Input dataset
     parser.add_argument('--dataset', type=str, default='cornell')
+
+    # Bypassing pre-processing by directly downloading all the files
+    parser.add_argument('--shortcut', action="store_true", default=False,
+                        help="Whether to download the preprocessed dataset instead.")
 
     args = parser.parse_args()
 
@@ -216,80 +244,84 @@ if __name__ == '__main__':
     min_freq = args.min_vocab_frequency
     n_workers = args.n_workers
 
-    conversations = []
-    # CORNELL DATA
-    if args.dataset == 'cornell':
-        dataset_dir = cornell_dir
-        conversations = load_conversations_cornell(cornell_dir)
+    if args.shortcut:
+        shortcut_download(args.dataset)
     else:
-        dataset_dir = datasets_dir.joinpath(args.dataset)
-        with open('datasets/{}/{}.json'.format(args.dataset, args.dataset), 'r') as f:
-            conversations = json.load(f)
+        conversations = []
+        # Cornell data
+        if args.dataset == 'cornell':
+            dataset_dir = cornell_dir
+            conversations = load_conversations_cornell(cornell_dir)
+        # Reddit_casual data
+        else:
+            dataset_dir = datasets_dir.joinpath(args.dataset)
+            with open('datasets/{}/{}.json'.format(args.dataset, args.dataset), 'r') as f:
+                conversations = json.load(f)
 
-    print('Train/Valid/Test Split')
-    train, valid, test = train_valid_test_split_by_conversation(conversations, split_ratio)
+        print('Train/Valid/Test Split')
+        train, valid, test = train_valid_test_split_by_conversation(conversations, split_ratio)
 
-    def to_pickle(obj, path):
-        with open(path, 'wb') as f:
-            pickle.dump(obj, f)
+        def to_pickle(obj, path):
+            with open(path, 'wb') as f:
+                pickle.dump(obj, f)
 
-    for split_type, conv_objects in [('train', train), ('valid', valid), ('test', test)]:
-        print(f'Processing {split_type} dataset...')
-        split_data_dir = dataset_dir.joinpath(split_type)
-        split_data_dir.mkdir(exist_ok=True)
+        for split_type, conv_objects in [('train', train), ('valid', valid), ('test', test)]:
+            print(f'Processing {split_type} dataset...')
+            split_data_dir = dataset_dir.joinpath(split_type)
+            split_data_dir.mkdir(exist_ok=True)
 
-        print(f'Tokenize.. (n_workers={n_workers})')
+            print(f'Tokenize.. (n_workers={n_workers})')
 
-        def _tokenize_conversation(conv):
-            return tokenize_conversation(conv['lines'])
+            def _tokenize_conversation(conv):
+                return tokenize_conversation(conv['lines'])
 
-        with Pool(n_workers) as pool:
-            conversations = list(tqdm(pool.imap(_tokenize_conversation, conv_objects),
-                                     total=len(conv_objects)))
+            with Pool(n_workers) as pool:
+                conversations = list(tqdm(pool.imap(_tokenize_conversation, conv_objects),
+                                         total=len(conv_objects)))
 
-        conversation_length = [min(len(conv['lines']), max_conv_len)
-                               for conv in conv_objects]
+            conversation_length = [min(len(conv['lines']), max_conv_len)
+                                   for conv in conv_objects]
 
-        raw_sentences = [[line['text'] for line in conv['lines'][0:min(len(conv['lines']), max_conv_len)]]
-                         for conv in conv_objects]
+            raw_sentences = [[line['text'] for line in conv['lines'][0:min(len(conv['lines']), max_conv_len)]]
+                             for conv in conv_objects]
 
-        sentences, sentence_length = pad_sentences(
-            conversations,
-            max_sentence_length=max_sent_len,
-            max_conversation_length=max_conv_len)
+            sentences, sentence_length = pad_sentences(
+                conversations,
+                max_sentence_length=max_sent_len,
+                max_conversation_length=max_conv_len)
 
-        print('Saving preprocessed data at', split_data_dir)
-        to_pickle(raw_sentences, split_data_dir.joinpath('raw_sentences.pkl'))
-        to_pickle(conversation_length, split_data_dir.joinpath('conversation_length.pkl'))
-        to_pickle(sentences, split_data_dir.joinpath('sentences.pkl'))
-        to_pickle(sentence_length, split_data_dir.joinpath('sentence_length.pkl'))
+            print('Saving preprocessed data at', split_data_dir)
+            to_pickle(raw_sentences, split_data_dir.joinpath('raw_sentences.pkl'))
+            to_pickle(conversation_length, split_data_dir.joinpath('conversation_length.pkl'))
+            to_pickle(sentences, split_data_dir.joinpath('sentences.pkl'))
+            to_pickle(sentence_length, split_data_dir.joinpath('sentence_length.pkl'))
 
-        if split_type == 'train':
+            if split_type == 'train':
 
-            print('Save Vocabulary...')
-            vocab = Vocab(tokenizer)
-            vocab.add_dataframe(conversations)
-            vocab.update(max_size=max_vocab_size, min_freq=min_freq)
+                print('Save Vocabulary...')
+                vocab = Vocab(tokenizer)
+                vocab.add_dataframe(conversations)
+                vocab.update(max_size=max_vocab_size, min_freq=min_freq)
 
-            print('Vocabulary size: ', len(vocab))
-            vocab.pickle(dataset_dir.joinpath('word2id.pkl'), dataset_dir.joinpath('id2word.pkl'))
+                print('Vocabulary size: ', len(vocab))
+                vocab.pickle(dataset_dir.joinpath('word2id.pkl'), dataset_dir.joinpath('id2word.pkl'))
 
-    print('Done downloading and pre-processing dataset.')
+        print('Done downloading and pre-processing dataset.')
 
-    print('Inferring TorchMoji encoding for dataset...')
-    torchmoji_export_script = os.path.join(os.path.join('torchMoji', 'api'), 'dataset_emojize.py')
-    for split_type in ['train', 'valid', 'test']:
-        filepath = os.path.join(os.path.join(dataset_dir, split_type), 'raw_sentences.pkl')
-        call(["python", torchmoji_export_script, f'--filepath={filepath}'])
-    print('Done exporting TorchMoji embedding.')
+        print('Inferring TorchMoji encoding for dataset...')
+        torchmoji_export_script = os.path.join(os.path.join('torchMoji', 'api'), 'dataset_emojize.py')
+        for split_type in ['train', 'valid', 'test']:
+            filepath = os.path.join(os.path.join(dataset_dir, split_type), 'raw_sentences.pkl')
+            call(["python", torchmoji_export_script, f'--filepath={filepath}'])
+        print('Done exporting TorchMoji embedding.')
 
-    print('Inferring InferSent encoding for dataset...')
-    infersent_export_script = os.path.join(os.path.join('inferSent', 'api'), 'export_dataset_embeddings.py')
-    for split_type in ['train', 'valid', 'test']:
-        filepath = os.path.join(os.path.join(dataset_dir, split_type), 'raw_sentences.pkl')
-        call(["python", infersent_export_script, f'--filepath={filepath}'])
-    infersent_reduction_script = os.path.join(os.path.join('inferSent', 'api'), 'reduce_embeddings_dimension.py')
-    call(["python", infersent_reduction_script, f'--dataset={dataset_dir} --savepca --exportembeddings'])
-    print('Done exporting InferSent embedding.')
+        print('Inferring InferSent encoding for dataset...')
+        infersent_export_script = os.path.join(os.path.join('inferSent', 'api'), 'export_dataset_embeddings.py')
+        for split_type in ['train', 'valid', 'test']:
+            filepath = os.path.join(os.path.join(dataset_dir, split_type), 'raw_sentences.pkl')
+            call(["python", infersent_export_script, f'--filepath={filepath}'])
+        infersent_reduction_script = os.path.join(os.path.join('inferSent', 'api'), 'reduce_embeddings_dimension.py')
+        call(["python", infersent_reduction_script, f'--dataset={dataset_dir} --savepca --exportembeddings'])
+        print('Done exporting InferSent embedding.')
 
-    print('Successfully completed!')
+        print('Successfully completed!')

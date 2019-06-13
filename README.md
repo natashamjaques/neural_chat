@@ -51,13 +51,20 @@ python torchMoji/scripts/download_weights.py
 ## Download & Preprocess data
 The following scripts will:
 
-1. Create directories `./datasets/cornell/` and `./datasets/ubuntu/` respectively.
+1. Create directories `./datasets/reddit_casual/` and `./datasets/cornell/` respectively.
 
 2. Download and preprocess conversation data inside each directory.
 
-### for [Cornell Movie Dialogue dataset](https://www.cs.cornell.edu/~cristian/Cornell_Movie-Dialogs_Corpus.html)
+### for [Reddit Casual Conversations Dataset](https://www.reddit.com/r/CasualConversation/)
+
+To download the pre-processed dataset, use:
 ```
-python cornell_preprocess.py
+python dataset_preprocess.py --dataset=reddit_casual --shortcut
+```
+
+Alternatively, if you'd like to download a smaller version, and do pre-processing steps on your end, use:
+```
+python dataset_preprocess.py --dataset=reddit_casual
     --max_sentence_length (maximum number of words in sentence; default: 30)
     --max_conversation_length (maximum turns of utterances in single conversation; default: 10)
     --max_vocab_size (maximum size of word vocabulary; default: 20000)
@@ -65,15 +72,23 @@ python cornell_preprocess.py
     --n_workers (number of workers for multiprocessing; default: os.cpu_count())
 ```
 
-### for [Ubuntu Dialog Dataset](http://dataset.cs.mcgill.ca/ubuntu-corpus-1.0/)
+### for [Cornell Movie Dialogue Dataset](https://www.cs.cornell.edu/~cristian/Cornell_Movie-Dialogs_Corpus.html)
+
+To download the pre-processed dataset, use:
 ```
-python ubuntu_preprocess.py
+python dataset_preprocess.py --dataset=cornell --shortcut
+```
+
+Alternatively, if you'd like to download a smaller version, and do pre-processing steps on your end, use:
+```
+python dataset_preprocess.py --dataset=reddit_casual
     --max_sentence_length (maximum number of words in sentence; default: 30)
     --max_conversation_length (maximum turns of utterances in single conversation; default: 10)
     --max_vocab_size (maximum size of word vocabulary; default: 20000)
     --max_vocab_frequency (minimum frequency of word to be included in vocabulary; default: 5)
     --n_workers (number of workers for multiprocessing; default: os.cpu_count())
 ```
+
 
 ## Training
 Go to the model directory and set the save_dir in configs.py (this is where the model checkpoints will be saved)
