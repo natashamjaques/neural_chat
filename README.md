@@ -96,6 +96,10 @@ Go to the model directory and set the save_dir in configs.py (this is where the 
 By default, it will save a model checkpoint every epoch to <save_dir> and a tensorboard summary.
 For more arguments and options, see config.py.
 
+Note that after training, you should only keep the single optimal checkpoint in the checkpoint directory for 
+[evaluation](#evaluation) and [interaction](#interacting-with-models) steps and remove the 
+remaining checkpoints.
+
 ### Training EI (Emotion+Infersent) Models
 
 We provide our implementation of EI (Emotion+Infersent) models built upon implementations for [VHCR](https://arxiv.org/pdf/1804.03424.pdf), [VHRED](https://arxiv.org/abs/1605.06069), and [HRED](https://arxiv.org/abs/1507.02221).
@@ -136,27 +140,28 @@ python model/rl/run_rl.py -r 'reward_you' 'reward_what' -rw 2.0 1.5
 ```
 
 ## Evaluation
+
 To evaluate the word perplexity:
 ```
-python model/eval.py --model=<model> --checkpoint=<path_to_your_checkpoint>
+python model/eval.py --mode=<mode> --checkpoint=<path_to_your_checkpoint_directory>
 ```
 
 For embedding based metrics, you need to download [Google News word vectors](https://drive.google.com/file/d/0B7XkCwpI5KDYNlNUTTlSS21pQmM/edit?usp=sharing), unzip it and put it under the datasets folder.
 Then run:
 ```
-python model/eval_embed.py --model=<model> --checkpoint=<path_to_your_checkpoint>
+python model/eval_embed.py --mode=<mode> --checkpoint=<path_to_your_checkpoint_directory>
 ```
 
 To evaluate sentiment and semantics using distance from torhcmoji and infersent inferred embedding:
 ```
-python model/eval_novel.py --model=<model> --checkpoint=<path_to_your_checkpoint>
+python model/eval_novel.py --mode=<mode> --checkpoint=<path_to_your_checkpoint_directory>
 ```
 
 ## Interacting with Models
 
 Use the following command to interact with / talk to a saved model checkpoint:
 ```
-python model/interact.py --debug --checkpoint=<path_to_your_checkpoint>
+python model/interact.py --debug --checkpoint=<path_to_your_checkpoint_directory>
 ```
 
 ## Reference

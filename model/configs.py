@@ -16,7 +16,7 @@ optimizer_dict = {'RMSprop': optim.RMSprop, 'Adam': optim.Adam}
 rnn_dict = {'lstm': nn.LSTM, 'gru': nn.GRU}
 rnncell_dict = {'lstm': StackedLSTMCell, 'gru': StackedGRUCell}
 username = Path.home().name
-save_dir = Path(os.path.expanduser('~')+'/dialog/model_checkpoints/')
+save_dir = Path(os.path.expanduser('~')+'/neural_chat/model_checkpoints/')
 
 
 def str2bool(v):
