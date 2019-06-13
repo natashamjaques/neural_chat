@@ -11,7 +11,7 @@ Note that rewards should be normalized for best results.
 
 from torchMoji.api.botmoji import Botmoji, EMOJIS
 from inferSent.api.botsent import Botsent
-
+from model.utils import embedding_metric
 import replay_buffer
 
 import argparse
@@ -20,11 +20,10 @@ import numpy as np
 import pandas as pd
 from pathlib import Path
 
-from model.utils import embedding_metric
 import gensim
-ROOT_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-word2vec_path = os.path.join(ROOT_DIR, "datasets/GoogleNews-vectors-negative300.bin")
 import nltk
+ROOT_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+word2vec_path = os.path.join(os.path.join(ROOT_DIR, 'datasets'), 'GoogleNews-vectors-negative300.bin')
 
 
 def _get_emojis_to_rewards_dict():
@@ -86,14 +85,14 @@ def parse_args():
     return parser.parse_args()
 
 
-def normalize01(x):
+def normalize_01(x):
     x = np.array(x)
     min_x = min(x)
     max_x = max(x)
     return (x - min_x) / (max_x - min_x)
 
 
-def normalizeZ(x):
+def normalize_z(x):
     x = np.array(x)
     mean = np.mean(x)
     std = np.std(x)
@@ -117,11 +116,10 @@ def cosine_similarity(a, b):
 
 
 def reward_you(csv_buff):
-    """Allocates reward for any sentence that contains the reward 'you'. Used
-    for debugging"""
+    """Allocates reward for any sentence that contains the reward 'you'. Used for debugging"""
     print("Computing reward_you")
     rewards = [1 if 'you' in r else 0 for r in csv_buff.buffer['Response']]
-    csv_buff.buffer['reward_you'] = normalize01(rewards)
+    csv_buff.buffer['reward_you'] = normalize_01(rewards)
     return csv_buff
 
 
@@ -138,8 +136,8 @@ def reward_answer_length_words(csv_buff):
 
     # Clip to a max length of 30 words to prevent noise from spammers
     rewards = np.clip(rewards, 0, 30)
-    csv_buff.buffer['reward_answer_length_words'] = normalize01(rewards)
-    csv_buff.buffer['reward_answer_length_words_zscore'] = normalizeZ(rewards)
+    csv_buff.buffer['reward_answer_length_words'] = normalize_01(rewards)
+    csv_buff.buffer['reward_answer_length_words_zscore'] = normalize_z(rewards)
     return csv_buff
 
 
@@ -153,8 +151,9 @@ def reward_answer_length_chars(csv_buff):
         if not dones[i]:
             rewards[i] = len(x)
     csv_buff.buffer['reward_answer_length_chars_unnormalized'] = rewards
-    csv_buff.buffer['reward_answer_length_chars'] = normalize01(rewards)
+    csv_buff.buffer['reward_answer_length_chars'] = normalize_01(rewards)
     return csv_buff
+
 
 def reward_user_ha(csv_buff):
     """Allocates reward for number 'ha's in the human answer."""
@@ -166,8 +165,9 @@ def reward_user_ha(csv_buff):
         if not dones[i]:
             rewards[i] = x.count('ha')
     rewards = np.clip(rewards, 0, 4)
-    csv_buff.buffer['reward_user_ha'] = normalizeZ(rewards)
+    csv_buff.buffer['reward_user_ha'] = normalize_z(rewards)
     return csv_buff
+
 
 def reward_conversation_length(csv_buff, gamma=.95):
     """Allocates reward for length of each conversation"""
@@ -190,7 +190,7 @@ def reward_conversation_length(csv_buff, gamma=.95):
             processed_df = conv
         else:
             processed_df = pd.concat([processed_df, conv])
-    processed_df['reward_conversation_length'] = normalizeZ(
+    processed_df['reward_conversation_length'] = normalize_z(
         processed_df['reward_conversation_length'].tolist())
     csv_buff.buffer = processed_df
     return csv_buff
@@ -200,7 +200,7 @@ def reward_manual_ratings(csv_buff):
     """Allocates reward for manual presses of upvote/downvote button"""
     print("Computing reward_manual_ratings")
     rewards = csv_buff.buffer['Response Rating'].tolist()
-    csv_buff.buffer['reward_manual_ratings'] = normalizeZ(rewards)
+    csv_buff.buffer['reward_manual_ratings'] = normalize_z(rewards)
     return csv_buff
 
 
@@ -220,13 +220,12 @@ def reward_deepmoji(csv_buff):
     rewards = np.dot(user_emojis, reward_multiplier)
     rewards *= mask
     csv_buff.buffer['reduced_deepmoji'] = rewards
-    csv_buff.buffer['reward_deepmoji'] = normalizeZ(rewards)
+    csv_buff.buffer['reward_deepmoji'] = normalize_z(rewards)
     return csv_buff, botmoji
 
 
 def reward_deepmoji_coherence(csv_buff, botmoji=None):
-    """Allocates reward for coherence between user input and bot response in
-    DeepMoji prediction vector space"""
+    """Allocates reward for coherence between user input and bot response in DeepMoji prediction vector space"""
     print("Computing reward_deepmoji_coherence")
     if not botmoji:
         botmoji = Botmoji()
@@ -244,8 +243,7 @@ def reward_deepmoji_coherence(csv_buff, botmoji=None):
 
 
 def reward_infersent_coherence(csv_buff, dataset):
-    """Allocates reward for coherence between user input and bot response in
-    Infersent embedding space"""
+    """Allocates reward for coherence between user input and bot response in Infersent embedding space"""
     print("Computing reward_infersent_coherence")
     repo_dir = Path(ROOT_DIR)
     dataset_dir = repo_dir.joinpath('datasets', dataset, 'train')
@@ -261,7 +259,7 @@ def reward_infersent_coherence(csv_buff, dataset):
 
     reward_name = 'reward_infersent_coherence_' + dataset
     csv_buff.buffer[reward_name+'_unnormalized'] = coherence
-    csv_buff.buffer[reward_name] = normalizeZ(coherence)
+    csv_buff.buffer[reward_name] = normalize_z(coherence)
 
     return csv_buff
 
@@ -342,9 +340,9 @@ def reward_user_var_emotion(csv_buff, botmoji=None):
     return csv_buff
 
 
-def reward_user_AUC_emotion_transition(csv_buff, botmoji=None):
+def reward_user_auc_emotion_transition(csv_buff, botmoji=None):
     """Allocates reward for positive AUC for shift in emotional tone of user responses."""
-    print("Computing reward_user_AUC_emotion_transition")
+    print("Computing reward_user_auc_emotion_transition")
 
     if 'reward_user_emotional_transition' not in csv_buff.buffer.columns:
         csv_buff = reward_user_emotional_transition(csv_buff, botmoji)
@@ -354,7 +352,7 @@ def reward_user_AUC_emotion_transition(csv_buff, botmoji=None):
     for chat_id in df['Chat ID'].unique():
         conv = df[df['Chat ID'] == chat_id]
         rewards = [np.sum(conv['reward_user_emotional_transition'])] * len(conv)
-        conv['reward_user_AUC_emotion_transition'] = rewards
+        conv['reward_user_auc_emotion_transition'] = rewards
         if processed_df is None:
             processed_df = conv
         else:
@@ -380,8 +378,9 @@ def reward_question(csv_buff):
         if has_q_word:
             rewards[i] += 0.5
     csv_buff.buffer['reward_question'] = rewards
-    csv_buff.buffer['reward_question_zscore'] = normalizeZ(rewards)
+    csv_buff.buffer['reward_question_zscore'] = normalize_z(rewards)
     return csv_buff
+
 
 def reward_traditional_embedding_metrics(csv_buff):
     """Allocates reward for any sentence that contains asks questions."""
@@ -445,8 +444,9 @@ def reward_compliments(csv_buff):
                 continue
 
     csv_buff.buffer['reward_compliments'] = rewards
-    csv_buff.buffer['reward_compliments_zscore'] = normalizeZ(rewards)
+    csv_buff.buffer['reward_compliments_zscore'] = normalize_z(rewards)
     return csv_buff
+
 
 def reward_politeness(csv_buff):
     key_phrases = ['if i may', 'may i', 'please', 'thanks', 'no worries',
@@ -463,8 +463,9 @@ def reward_politeness(csv_buff):
                 continue
 
     csv_buff.buffer['reward_politeness'] = rewards
-    csv_buff.buffer['reward_politeness_zscore'] = normalizeZ(rewards)
+    csv_buff.buffer['reward_politeness_zscore'] = normalize_z(rewards)
     return csv_buff
+
 
 def reward_supportive(csv_buff):
     key_phrases = ["you're right", "you are right", "you re right", 
@@ -490,8 +491,9 @@ def reward_supportive(csv_buff):
                 rewards[i] = 1
                 continue
     csv_buff.buffer['reward_supportive'] = rewards
-    csv_buff.buffer['reward_supportive_zscore'] = normalizeZ(rewards)
+    csv_buff.buffer['reward_supportive_zscore'] = normalize_z(rewards)
     return csv_buff
+
 
 def reward_cheerful(csv_buff):
     key_phrases = ["nice to hear", "happy", "excited", "really nice", 
@@ -506,7 +508,7 @@ def reward_cheerful(csv_buff):
                 continue
 
     csv_buff.buffer['reward_cheerful'] = rewards
-    csv_buff.buffer['reward_cheerful_zscore'] = normalizeZ(rewards)
+    csv_buff.buffer['reward_cheerful_zscore'] = normalize_z(rewards)
     return csv_buff
 
 
@@ -529,7 +531,7 @@ if __name__ == '__main__':
     buffer = reward_user_emotional_transition(buffer, botmoji)
     buffer = reward_user_min_max_emotion_transition(buffer, botmoji)
     buffer = reward_user_var_emotion(buffer, botmoji)
-    buffer = reward_user_AUC_emotion_transition(buffer, botmoji)
+    buffer = reward_user_auc_emotion_transition(buffer, botmoji)
     buffer = reward_infersent_coherence(buffer, 'cornell')
     buffer = reward_infersent_coherence(buffer, 'reddit_casual')
     buffer = reward_question(buffer)
