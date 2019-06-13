@@ -17,8 +17,6 @@ def load_pickle(path):
         return pickle.load(f)
 
 
-# notes: currently it is slow to evaluate with these metrics
-
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--checkpoint', type=str, default=None)

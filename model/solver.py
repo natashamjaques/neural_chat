@@ -21,7 +21,7 @@ from nltk.tokenize.treebank import TreebankWordDetokenizer as Detok
 
 ROOT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-word2vec_path = os.path.join(ROOT_DIR, "datasets/GoogleNews-vectors-negative300.bin")
+word2vec_path = os.path.join(os.path.join(ROOT_DIR, 'datasets'), 'GoogleNews-vectors-negative300.bin')
 
 # Tokenizer
 tokenizer = Tokenizer('spacy')
@@ -1180,8 +1180,7 @@ class VariationalSolver(Solver):
         return epoch_loss
 
     def importance_sample(self):
-        ''' Perform importance sampling to get tighter bound
-        '''
+        """ Perform importance sampling to get tighter bound """
         self.model.eval()
         weight_history = []
         emoji_loss_history = []
