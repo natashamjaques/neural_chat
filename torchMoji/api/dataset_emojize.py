@@ -60,6 +60,13 @@ if __name__ == "__main__":
     model = torchmoji_emojis(PRETRAINED_PATH)
 
     sentences = pickle.load(open(args.filepath, 'rb'))
+    # TODO: encode multiple sentences at once.
+    #  Needs TorchMoji module to handle empty sentences and output equal probabilities
+    # flattened_sentences = [utterance for conversation in sentences for utterance in conversation]
+    # print('Encoding sentences ...')
+    # flattened_tokenized, _, _ = st.tokenize_sentences(flattened_sentences)
+    # flattened_probs = model(flattened_tokenized)
+    # print('TorchMoji encoding done.')
     idx = 0
     for conversation in sentences:
         idx += 1
@@ -78,9 +85,9 @@ if __name__ == "__main__":
             if idx < args.debuglen:
                 print(max(prob))
                 print(prob)
-                # Top emoji id
+                # Top emoji ID
                 emoji_ids = top_elements(prob, 1)
-                # map to emojis
+                # Map to emojis
                 emojis = map(lambda x: EMOJIS[x], emoji_ids)
                 print('Retokenized: ', st.to_sentence(list(tokenized[0])))
                 print(emoji.emojize("{} {}".format(sentence, ' '.join(emojis)), use_aliases=True))
