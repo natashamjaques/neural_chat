@@ -14,6 +14,7 @@ datasets/
 /cornell_movie_dialogue/
 *.orig
 *.lprof
+.idea
 
 # Remote edit
 *.ftpconfig
