@@ -14,8 +14,9 @@ from model.utils import Tokenizer, Vocab, PAD_TOKEN, SOS_TOKEN, EOS_TOKEN, pad_s
 from subprocess import call
 
 project_dir = Path(__file__).resolve().parent
-datasets_dir = project_dir.joinpath('datasets/')
-cornell_dir = datasets_dir.joinpath('cornell/')
+datasets_dir = os.path.join(project_dir, 'datasets')
+cornell_dir = os.path.join(datasets_dir, 'cornell')
+reddit_casual_dir = os.path.join(datasets_dir, 'reddit_casual')
 
 # Tokenizer
 tokenizer = Tokenizer('spacy')
@@ -45,6 +46,29 @@ def shortcut_download(dataset):
         print('Directory already exists. Aborting download.')
 
 
+def prepare_reddit_casual_data():
+    """Download and unpack dialogs"""
+
+    zip_url = 'https://affect.media.mit.edu/neural_chat/datasets/reddit_casual.json.zip'
+    zipfile_path = datasets_dir.joinpath('reddit_casual.json.zip')
+
+    if not datasets_dir.exists():
+        datasets_dir.mkdir()
+
+    # Prepare Dialog data
+    if not reddit_casual_dir.exists():
+        print(f'Downloading {zip_url} to {zipfile_path}')
+        urlretrieve(zip_url, zipfile_path)
+        print(f'Successfully downloaded {zipfile_path}')
+
+        zip_ref = ZipFile(zipfile_path, 'r')
+        zip_ref.extractall(datasets_dir)
+        zip_ref.close()
+
+    else:
+        print('Reddit Casual data prepared!')
+
+
 def prepare_cornell_data():
     """Download and unpack dialogs"""
 
@@ -67,7 +91,7 @@ def prepare_cornell_data():
         datasets_dir.joinpath('cornell movie-dialogs corpus').rename(cornell_dir)
 
     else:
-        print('Cornell Data prepared!')
+        print('Cornell data prepared!')
 
 
 def load_lines(file_name,
@@ -254,6 +278,7 @@ if __name__ == '__main__':
             conversations = load_conversations_cornell(cornell_dir)
         # Reddit_casual data
         else:
+            prepare_reddit_casual_data()
             dataset_dir = datasets_dir.joinpath(args.dataset)
             with open('datasets/{}/{}.json'.format(args.dataset, args.dataset), 'r') as f:
                 conversations = json.load(f)
