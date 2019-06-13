@@ -27,7 +27,7 @@ def shortcut_download(dataset):
 
     zip_url = f'https://affect.media.mit.edu/neural_chat/datasets/{dataset}_preprocessed.zip'
     zipfile_dir = datasets_dir.joinpath(dataset)
-    zipfile_path = datasets_dir.joinpath(f'{dataset}.zip')
+    zipfile_path = datasets_dir.joinpath(f'{dataset}_preprocessed.zip')
 
     if not os.path.exists(datasets_dir):
         os.makedirs(datasets_dir)
@@ -51,8 +51,8 @@ def shortcut_download(dataset):
 def prepare_reddit_casual_data():
     """Download and unpack dialogs"""
 
-    zip_url = 'https://affect.media.mit.edu/neural_chat/datasets/reddit_casual.json.zip'
-    zipfile_path = datasets_dir.joinpath('reddit_casual.json.zip')
+    zip_url = 'https://affect.media.mit.edu/neural_chat/datasets/reddit_casual.zip'
+    zipfile_path = datasets_dir.joinpath('reddit_casual.zip')
 
     if not os.path.exists(datasets_dir):
         os.makedirs(datasets_dir)
@@ -64,7 +64,7 @@ def prepare_reddit_casual_data():
         print(f'Successfully downloaded {zipfile_path}')
 
         zip_ref = ZipFile(zipfile_path, 'r')
-        zip_ref.extractall(datasets_dir)
+        zip_ref.extractall(reddit_casual_dir)
         zip_ref.close()
 
         print(f'Successfully extracted {zipfile_path}')
@@ -339,13 +339,6 @@ if __name__ == '__main__':
 
         print('Done downloading and pre-processing dataset.')
 
-        print('Inferring TorchMoji encoding for dataset...')
-        torchmoji_export_script = os.path.join(os.path.join('torchMoji', 'api'), 'dataset_emojize.py')
-        for split_type in ['train', 'valid', 'test']:
-            filepath = os.path.join(os.path.join(dataset_dir, split_type), 'raw_sentences.pkl')
-            call(["python", torchmoji_export_script, f'--filepath={filepath}'])
-        print('Done exporting TorchMoji embedding.')
-
         print('Inferring InferSent encoding for dataset...')
         infersent_export_script = os.path.join(os.path.join('inferSent', 'api'), 'export_dataset_embeddings.py')
         for split_type in ['train', 'valid', 'test']:
@@ -354,5 +347,12 @@ if __name__ == '__main__':
         infersent_reduction_script = os.path.join(os.path.join('inferSent', 'api'), 'reduce_embeddings_dimension.py')
         call(["python", infersent_reduction_script, f'--dataset={dataset_dir} --savepca --exportembeddings'])
         print('Done exporting InferSent embedding.')
+
+        print('Inferring TorchMoji encoding for dataset...')
+        torchmoji_export_script = os.path.join(os.path.join('torchMoji', 'api'), 'dataset_emojize.py')
+        for split_type in ['train', 'valid', 'test']:
+            filepath = os.path.join(os.path.join(dataset_dir, split_type), 'raw_sentences.pkl')
+            call(["python", torchmoji_export_script, f'--filepath={filepath}'])
+        print('Done exporting TorchMoji embedding.')
 
         print('Successfully completed!')
