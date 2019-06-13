@@ -48,7 +48,7 @@ Run the download script to downloads the pre-trained torchMoji weights [~85MB] f
 python torchMoji/scripts/download_weights.py
 ```
 
-## Download & Preprocess data
+## Download & Preprocess Data
 The following scripts will:
 
 1. Create directories `./datasets/reddit_casual/` and `./datasets/cornell/` respectively.
@@ -91,47 +91,63 @@ python dataset_preprocess.py --dataset=reddit_casual
 
 
 ## Training
-Go to the model directory and set the save_dir in configs.py (this is where the model checkpoints will be saved)
-
-We provide our implementation of VHCR, as well as our reference implementations for [HRED](https://arxiv.org/abs/1507.02221) and [VHRED](https://arxiv.org/abs/1605.06069).
-
-To run training:
-```
-python train.py --data=<data> --model=<model> --batch_size=<batch_size>
-```
-
-For example:
-1. Train HRED on Cornell Movie:
-```
-python train.py --data=cornell --model=HRED
-```
-
-2. Train VHRED with word drop of ratio 0.25 and kl annealing iterations 250000:
-```
-python train.py --data=ubuntu --model=VHRED --batch_size=40 --word_drop=0.25 --kl_annealing_iter=250000
-```
-
-3. Train VHCR with utterance drop of ratio 0.25:
-```
-python train.py --data=ubuntu --model=VHCR --batch_size=40 --sentence_drop=0.25 --kl_annealing_iter=250000
-```
+Go to the model directory and set the save_dir in configs.py (this is where the model checkpoints will be saved).
 
 By default, it will save a model checkpoint every epoch to <save_dir> and a tensorboard summary.
 For more arguments and options, see config.py.
 
+### Training EI (Emotion+Infersent) Models
+
+We provide our implementation of EI (Emotion+Infersent) models built upon implementations for [VHCR](https://arxiv.org/pdf/1804.03424.pdf), [VHRED](https://arxiv.org/abs/1605.06069), and [HRED](https://arxiv.org/abs/1507.02221).
+
+To run training:
+```
+python train.py --data=<data> --model=<model> --batch_size=<batch_size> [--emotion --infersent]
+```
+
+For example:
+1. Train HRED-Infersent-only on Cornell Movie:
+```
+python model/train.py --data=cornell --model=HRED --infersent --infersent_weight=25000 --infersent_embedding_size=128
+```
+
+2. Train VHRED-Emotion-only on Reddit Casual Conversations:
+```
+python model/train.py --data=reddit_casual --model=VHRED --emotion --emo_weight=25 --emo_embedding_size=128
+```
+
+3. Train VHCR-EI on Reddit Casual Conversations:
+```
+python model/train.py --data=reddit_casual --model=VHCR --emotion --infersent --emo_weight=25 --emo_embedding_size=128 --infersent_weight=100000 --infersent_embedding_size=4000
+```
+
+### Training Reinforcement Learning Models
+
+[To be completed]
 
 ## Evaluation
 To evaluate the word perplexity:
 ```
-python eval.py --model=<model> --checkpoint=<path_to_your_checkpoint>
+python model/eval.py --model=<model> --checkpoint=<path_to_your_checkpoint>
 ```
 
 For embedding based metrics, you need to download [Google News word vectors](https://drive.google.com/file/d/0B7XkCwpI5KDYNlNUTTlSS21pQmM/edit?usp=sharing), unzip it and put it under the datasets folder.
 Then run:
 ```
-python eval_embed.py --model=<model> --checkpoint=<path_to_your_checkpoint>
+python model/eval_embed.py --model=<model> --checkpoint=<path_to_your_checkpoint>
 ```
 
+To evaluate sentiment and semantics using distance from torhcmoji and infersent inferred embedding:
+```
+python model/eval_novel.py --model=<model> --checkpoint=<path_to_your_checkpoint>
+```
+
+## Interacting with Models
+
+Use the following command to interact with / talk to a saved model checkpoint:
+```
+python model/interact.py --debug --checkpoint=<path_to_your_checkpoint>
+```
 
 ## Reference
 If you use this code or the released Reddit dataset as part of any published research, please reference the following papers:
@@ -155,5 +171,7 @@ If you use this code or the released Reddit dataset as part of any published res
 ```
 
 
-### Related work
+### Related Work
 * Park, Y., Cho, J., & Kim, G. (2018, June). [*A Hierarchical Latent Structure for Variational Conversation Modeling*](https://www.aclweb.org/anthology/N18-1162). In Proceedings of the 2018 Conference of the North American Chapter of the Association for Computational Linguistics: Human Language Technologies, Volume 1 (Long Papers) (pp. 1792-1801).
+* Serban, I. V., Sordoni, A., Lowe, R., Charlin, L., Pineau, J., Courville, A., & Bengio, Y. (2017, February). [*A hierarchical latent variable encoder-decoder model for generating dialogues*](https://arxiv.org/pdf/1605.06069.pdf). In Thirty-First AAAI Conference on Artificial Intelligence.
+* Sordoni, A., Bengio, Y., Vahabi, H., Lioma, C., Grue Simonsen, J., & Nie, J. Y. (2015, October). [*A hierarchical recurrent encoder-decoder for generative context-aware query suggestion*](https://arxiv.org/pdf/1507.02221.pdf). In Proceedings of the 24th ACM International on Conference on Information and Knowledge Management (pp. 553-562). ACM.
