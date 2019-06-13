@@ -13,7 +13,7 @@ import argparse
 class Botsent():
     def __init__(self, train_set_path, version=1, explained_var=0.95,
                  use_pca=True):
-        root_path = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(str(train_set_path)))))
+        root_path = os.path.dirname(os.path.dirname(os.path.dirname(str(train_set_path))))
         infersent_path = os.path.join(os.path.join(root_path, 'inferSent'), 'encoder')
         self.version = version
         self.explained_var = explained_var
