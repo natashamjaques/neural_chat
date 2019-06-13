@@ -25,7 +25,7 @@ tokenizer = Tokenizer('spacy')
 def shortcut_download(dataset):
     """Download and unpack pre-processed dataset"""
 
-    zip_url = f'https://affect.media.mit.edu/neural_chat/datasets/{dataset}.zip'
+    zip_url = f'https://affect.media.mit.edu/neural_chat/datasets/{dataset}_preprocessed.zip'
     zipfile_dir = os.path.join(datasets_dir, dataset)
     zipfile_path = os.path.join(datasets_dir, f'{dataset}.zip')
 
@@ -41,6 +41,8 @@ def shortcut_download(dataset):
         zip_ref = ZipFile(zipfile_path, 'r')
         zip_ref.extractall(datasets_dir)
         zip_ref.close()
+
+        datasets_dir.joinpath(f'{dataset}_preprocessed').rename(zipfile_dir)
 
     else:
         print('Directory already exists. Aborting download.')
