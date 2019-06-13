@@ -14,6 +14,7 @@ def load_infersent_model(model_path, bsize=64, word_emb_dim=300, enc_lstm_dim=20
                     'pool_type': 'max', 'dpout_model': 0.0, 'version': version}
     model = InferSent(params_model)
     model.load_state_dict(torch.load(model_path))
+    model = model.cuda()
 
     infersent_dataset_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'dataset')
 
