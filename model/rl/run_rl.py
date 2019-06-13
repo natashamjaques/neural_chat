@@ -2,6 +2,7 @@ import argparse
 from model.configs import get_config_from_dir
 from batch_q_tune import BatchQTuner
 
+
 def parse_config_args():
     parser = argparse.ArgumentParser()
     
@@ -78,6 +79,7 @@ def parse_config_args():
 
     return vars(parser.parse_args())
 
+
 if __name__ == '__main__':
 
     kwargs_dict = parse_config_args()
@@ -112,4 +114,3 @@ if __name__ == '__main__':
         bqt.interact()
     else:
         print("Error, can't understand mode", config.mode)
-        

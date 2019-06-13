@@ -266,7 +266,6 @@ class BatchQTuner:
 
         return q_values, prior_rewards
 
-
     def get_target_q_values(self, batch, prior_rewards=None):
         rewards = to_var(torch.FloatTensor(batch['rewards']))  # [batch_size]
         not_done = to_var(torch.FloatTensor(1 - batch['done']))  # [batch_size]
@@ -603,6 +602,7 @@ class BatchQTuner:
                 max_sentence_length=self.config.max_sentence_length, 
                 max_conversation_length=self.config.max_conversation_length, 
                 sample_by='priority', debug=True, print_history=True)
+
 
 def load_pickle(path):
     with open(path, 'rb') as f:
