@@ -343,9 +343,12 @@ if __name__ == '__main__':
         infersent_export_script = os.path.join(os.path.join('inferSent', 'api'), 'export_dataset_embeddings.py')
         for split_type in ['train', 'valid', 'test']:
             filepath = os.path.join(os.path.join(dataset_dir, split_type), 'raw_sentences.pkl')
-            call(["python", infersent_export_script, f'--filepath={filepath}'])
+            if split_type == 'train':
+                call(["python", infersent_export_script, f'--filepath={filepath}', '--streaming'])
+            else:
+                call(["python", infersent_export_script, f'--filepath={filepath}'])
         infersent_reduction_script = os.path.join(os.path.join('inferSent', 'api'), 'reduce_embeddings_dimension.py')
-        call(["python", infersent_reduction_script, f'--dataset={dataset_dir} --savepca --exportembeddings'])
+        call(["python", infersent_reduction_script, f'--dataset={dataset_dir}', '--savepca', '--exportembeddings'])
         print('Done exporting InferSent embedding.')
 
         print('Inferring TorchMoji encoding for dataset...')
