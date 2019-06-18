@@ -80,7 +80,7 @@ if __name__ == "__main__":
             if idx == 1:
                 dump_pickle(conversation_embeddings, output_path)
             else:
-                dump_pickle(conversation_embeddings, output_path, model='ab')
+                dump_pickle(conversation_embeddings, output_path, mode='ab')
         sentence_embeddings += [conversation_embeddings]
     print(f'Conversations: {idx}, Sentences embedded: {sent_idx}')
     if not args.streaming:
