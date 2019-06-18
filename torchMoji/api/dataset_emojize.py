@@ -4,6 +4,7 @@
 
 from __future__ import print_function, division, unicode_literals
 
+from io_utils import load_pickle, dump_pickle
 from torchMoji.torchmoji.sentence_tokenizer import SentenceTokenizer
 from torchMoji.torchmoji.model_def import torchmoji_emojis
 from torchMoji.torchmoji.global_variables import PRETRAINED_PATH, VOCAB_PATH
@@ -13,7 +14,6 @@ import argparse
 
 import numpy as np
 import emoji
-import pickle
 import os
 
 
@@ -59,7 +59,7 @@ if __name__ == "__main__":
     # Loading model
     model = torchmoji_emojis(PRETRAINED_PATH)
 
-    sentences = pickle.load(open(args.filepath, 'rb'))
+    sentences = load_pickle(args.filepath)
     # TODO: encode multiple sentences at once.
     #  Needs TorchMoji module to handle empty sentences and output equal probabilities
     # flattened_sentences = [utterance for conversation in sentences for utterance in conversation]
@@ -97,5 +97,6 @@ if __name__ == "__main__":
         sentence_probs += [conversation_probs]
         retokenized_sentences += [conversation_retokenized]
     print('Step: ', idx)
-    pickle.dump(sentence_probs, open(output_path, 'wb'))
-    pickle.dump(retokenized_sentences, open(retokenized_sentences_output_path, 'wb'))
+    dump_pickle(sentence_probs, output_path)
+    dump_pickle(retokenized_sentences, retokenized_sentences_output_path)
+

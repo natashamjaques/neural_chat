@@ -1,9 +1,9 @@
 """ Use pre-trained inferSent model and export sentence embeddings. """
 
-import os
-import pickle
-import torch
+from io_utils import load_pickle, dump_pickle
 from inferSent.encoder.models import InferSent
+import os
+import torch
 import nltk
 import argparse
 nltk.download('punkt')
@@ -57,12 +57,13 @@ if __name__ == "__main__":
     else:
         output_path = os.path.join(prefix, f'sentence_embeddings_{args.version}.pkl')
 
-    sentences = pickle.load(open(args.filepath, 'rb'))
+    sentences = load_pickle(args.filepath)
     flattened_sentences = [utterance for conversation in sentences for utterance in conversation]
 
     print('Encoding sentences ...')
     flattened_embeddings = model.encode(flattened_sentences, tokenize=True, bsize=64)
     print('InferSent encoding done.')
+
     idx = 0
     sent_idx = 0
     for conversation in sentences:
@@ -77,11 +78,10 @@ if __name__ == "__main__":
             print(f'Conversations: {idx}, Sentences embedded: {sent_idx}')
         if args.streaming:
             if idx == 1:
-                pickle.dump(conversation_embeddings, open(output_path, 'wb'))
+                dump_pickle(conversation_embeddings, output_path)
             else:
-                pickle.dump(conversation_embeddings, open(output_path, 'ab'))
+                dump_pickle(conversation_embeddings, output_path, model='ab')
         sentence_embeddings += [conversation_embeddings]
     print(f'Conversations: {idx}, Sentences embedded: {sent_idx}')
     if not args.streaming:
-        pickle.dump(sentence_embeddings, open(output_path, 'wb'))
-
+        dump_pickle(sentence_embeddings, output_path)

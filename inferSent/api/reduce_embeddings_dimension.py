@@ -3,30 +3,11 @@ For each dataset, the training subset is used for building the PCA transformatio
 train, validation, and test sets.
 """
 
+from io_utils import load_pickle, dump_pickle
 import os
-import pickle
 import numpy as np
 from sklearn.decomposition import PCA
 import argparse
-
-
-def load_pickle(path):
-    if 'streaming' in path:
-        return load_streaming_pickle(path)
-    with open(path, 'rb') as f:
-        return pickle.load(f)
-
-
-def load_streaming_pickle(path):
-    items = []
-    with open(path, 'rb') as f:
-        while True:
-            try:
-                item = pickle.load(f)
-            except EOFError:
-                break
-            items += [item]
-    return items
 
 
 def fit_pca(inp, num_components):
@@ -72,16 +53,16 @@ if __name__ == "__main__":
         pca_model_file_path = os.path.join(train_dir, f'v{args.version}_PCA_model_{args.ndim}.pkl')
         if args.savepca:
             pca_embeddings = fit_pca(flattened_train_embeddings, args.ndim)
-            pickle.dump(pca_embeddings, open(pca_model_file_path, 'wb'))
+            dump_pickle(pca_embeddings, pca_model_file_path)
         else:
-            pca_embeddings = pickle.load(open(pca_model_file_path, 'rb'))
+            pca_embeddings = load_pickle(pca_model_file_path)
     else:
         pca_model_file_path = os.path.join(train_dir, f'v{args.version}_PCA_model_{args.explainedvar}.pkl')
         if args.savepca:
             pca_embeddings = fit_pca(flattened_train_embeddings, args.explainedvar)
-            pickle.dump(pca_embeddings, open(pca_model_file_path, 'wb'))
+            dump_pickle(pca_embeddings, pca_model_file_path)
         else:
-            pca_embeddings = pickle.load(open(pca_model_file_path, 'rb'))
+            pca_embeddings = load_pickle(pca_model_file_path)
 
     if args.exportembeddings:
         datasets = ['train', 'valid', 'test']
@@ -116,4 +97,4 @@ if __name__ == "__main__":
                     print(f'{idx} Conversations, including {sent_idx} sentence embeddings reduced.')
                 all_reduced += [conv_reduced]
             print(f'{idx} Conversations, including {sent_idx} sentence embeddings reduced. All done!')
-            pickle.dump(all_reduced, open(output_path, 'wb'))
+            dump_pickle(all_reduced, output_path)

@@ -7,6 +7,7 @@ import nltk
 import pickle
 import numpy as np
 
+
 def clean_post(text):
     text = re.sub(r'https?:\/\/.*[\r\n]*', '', text, flags=re.MULTILINE)
     text = re.sub(r'\n\n', ' ', text, flags=re.MULTILINE)
@@ -79,6 +80,7 @@ def clean_sub_conversations(sub_str, repeat=False):
                     break
 
     return sub_conversations
+
 
 if __name__ == "__main__":
     sub = 'relationship'
