@@ -1,7 +1,4 @@
 gensim==3.7.3
-# gensim==3.1.0
-# scipy==1.2.0
-# numpy==1.14.0
 pandas==0.20.3
 spacy==1.9.0
 tqdm==4.15.0
