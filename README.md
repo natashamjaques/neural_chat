@@ -1,5 +1,5 @@
 # Neural Chat
-[PyTorch 0.4](https://github.com/pytorch/pytorch) Implementation of Neural Chat ([Approximating Interactive Human Evaluation with Self-Play for Open-Domain Dialog Systems](https://arxiv.org/abs/), [Way Off-Policy Batch Deep Reinforcement Learning of Implicit Human Preferences in Dialog](https://arxiv.org/abs/)). You can interact with the models here: http://neural.chat. 
+[PyTorch 0.4](https://github.com/pytorch/pytorch) Implementation of Neural Chat: [Approximating Interactive Human Evaluation with Self-Play for Open-Domain Dialog Systems](https://arxiv.org/abs/). You can interact with the models here: http://neural.chat. 
 
 This code is inspired by and built off of "A Hierarchical Latent Structure for Variational Conversation Modeling" ([code](https://github.com/ctr4si/A-Hierarchical-Latent-Structure-for-Variational-Conversation-Modeling), [paper](https://arxiv.org/abs/1804.03424), [presentation](https://vimeo.com/277671819)). 
 
@@ -90,7 +90,7 @@ python dataset_preprocess.py --dataset=reddit_casual
 ```
 
 
-## Training
+## Training EI (Emotion+Infersent) Models
 Go to the model directory and set the save_dir in configs.py (this is where the model checkpoints will be saved).
 
 By default, it will save a model checkpoint every epoch to <save_dir> and a tensorboard summary.
@@ -99,8 +99,6 @@ For more arguments and options, see config.py.
 Note that after training, you should only keep the single optimal checkpoint in the checkpoint directory for 
 [evaluation](#evaluation) and [interaction](#interacting-with-models) steps and remove the 
 remaining checkpoints.
-
-### Training EI (Emotion+Infersent) Models
 
 We provide our implementation of EI (Emotion+Infersent) models built upon implementations for [VHCR](https://arxiv.org/pdf/1804.03424.pdf), [VHRED](https://arxiv.org/abs/1605.06069), and [HRED](https://arxiv.org/abs/1507.02221).
 
@@ -123,20 +121,6 @@ python model/train.py --data=reddit_casual --model=VHRED --emotion --emo_weight=
 3. Train VHCR-EI on Reddit Casual Conversations:
 ```
 python model/train.py --data=reddit_casual --model=VHCR --emotion --infersent --emo_weight=25 --emo_embedding_size=128 --infersent_weight=100000 --infersent_embedding_size=4000
-```
-
-### Training Reinforcement Learning Models
-
-[This section needs work]
-
-First, calculate rewards offline:
-```
-python model/rl/rewards.py --raw --experience_path=<path_to_experience_csv_file> --save_path=<save_path>
-```
-
-Then, run:
-```
-python model/rl/run_rl.py -r 'reward_you' 'reward_what' -rw 2.0 1.5
 ```
 
 ## Evaluation
@@ -165,10 +149,8 @@ python model/interact.py --debug --checkpoint=<path_to_your_checkpoint_directory
 ```
 
 ## Reference
-If you use this code or the released Reddit dataset as part of any published research, 
-please reference at least one of the following papers depending on your usage.
+If you use this code or the released Reddit dataset, please reference the following paper:
 
-For interactive evaluation, use of Reddit dataset, miscellaneous use-cases, refer to:
 ```
 @article{ghandeharioun2019approximating,
   title={Approximating Interactive Human Evaluation with Self-Play for Open-Domain Dialog Systems},
@@ -177,17 +159,6 @@ For interactive evaluation, use of Reddit dataset, miscellaneous use-cases, refe
   year={2019}
 }
 ```
-
-For reinforcement learning in dialog systems, refer to:
-```
-@article{jaques2019way,
-  title={Way Off-Policy Batch Deep Reinforcement Learning of Implicit Human Preferences in Dialog},
-  author={Jaques, Natasha and Ghandeharioun, Asma and Shen, Judy and Ferguson, Craig and Jones, Noah, and Lapedriza, Agata and Gu, Shixiang and Picard, Rosalind},
-  journal={arXiv preprint arXiv:},
-  year={2019}
-}
-```
-
 
 ### Related Work
 * Park, Y., Cho, J., & Kim, G. (2018, June). [*A Hierarchical Latent Structure for Variational Conversation Modeling*](https://www.aclweb.org/anthology/N18-1162). In Proceedings of the 2018 Conference of the North American Chapter of the Association for Computational Linguistics: Human Language Technologies, Volume 1 (Long Papers) (pp. 1792-1801).
