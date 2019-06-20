@@ -1,21 +1,21 @@
 # -*- coding: utf-8 -*-
 
-""" Uses torchMoji to predict emojis from a dataset.
-    Saves the softmax outputs to a file.
-    Prints first 10 sentences and their top 5 emojis as example.
-"""
+""" Uses torchMoji to predict emojis for a dataset and save the softmax outputs to a file. """
 
 from __future__ import print_function, division, unicode_literals
+
+from io_utils import load_pickle, dump_pickle
+from torchMoji.torchmoji.sentence_tokenizer import SentenceTokenizer
+from torchMoji.torchmoji.model_def import torchmoji_emojis
+from torchMoji.torchmoji.global_variables import PRETRAINED_PATH, VOCAB_PATH
+
 import json
 import argparse
 
 import numpy as np
 import emoji
-import pickle
+import os
 
-from torchMoji.torchmoji.sentence_tokenizer import SentenceTokenizer
-from torchMoji.torchmoji.model_def import torchmoji_emojis
-from torchMoji.torchmoji.global_variables import PRETRAINED_PATH, VOCAB_PATH
 
 # Emoji map in emoji_overview.png
 EMOJIS = ":joy: :unamused: :weary: :sob: :heart_eyes: \
@@ -47,8 +47,8 @@ if __name__ == "__main__":
     args = argparser.parse_args()
     sentence_probs = []
     retokenized_sentences = []
-    output_path = args.filepath[:args.filepath.rfind('/')+1] + 'sentence_emojis.pkl'
-    retokenized_sentences_output_path = args.filepath[:args.filepath.rfind('/')+1] + 'retokenized_sentences.pkl'
+    output_path = os.path.join(os.path.dirname(args.filepath), 'sentence_emojis.pkl')
+    retokenized_sentences_output_path = os.path.join(os.path.dirname(args.filepath), 'retokenized_sentences.pkl')
 
     # Tokenizing using dictionary
     with open(VOCAB_PATH, 'r') as f:
@@ -59,7 +59,14 @@ if __name__ == "__main__":
     # Loading model
     model = torchmoji_emojis(PRETRAINED_PATH)
 
-    sentences = pickle.load(open(args.filepath, 'rb'))
+    sentences = load_pickle(args.filepath)
+    # TODO: encode multiple sentences at once.
+    #  Needs TorchMoji module to handle empty sentences and output equal probabilities
+    # flattened_sentences = [utterance for conversation in sentences for utterance in conversation]
+    # print('Encoding sentences ...')
+    # flattened_tokenized, _, _ = st.tokenize_sentences(flattened_sentences)
+    # flattened_probs = model(flattened_tokenized)
+    # print('TorchMoji encoding done.')
     idx = 0
     for conversation in sentences:
         idx += 1
@@ -78,19 +85,18 @@ if __name__ == "__main__":
             if idx < args.debuglen:
                 print(max(prob))
                 print(prob)
-                # Top emoji id
+                # Top emoji ID
                 emoji_ids = top_elements(prob, 1)
-                # map to emojis
+                # Map to emojis
                 emojis = map(lambda x: EMOJIS[x], emoji_ids)
                 print('Retokenized: ', st.to_sentence(list(tokenized[0])))
                 print(emoji.emojize("{} {}".format(sentence, ' '.join(emojis)), use_aliases=True))
 
         if idx % args.step == 0:
             print('Step: ', idx)
-            # pickle.dump(sentence_probs, open(output_path, 'wb'))
-            # pickle.dump(retokenized_sentences, open(retokenized_sentences_output_path, 'wb'))
         sentence_probs += [conversation_probs]
         retokenized_sentences += [conversation_retokenized]
     print('Step: ', idx)
-    pickle.dump(sentence_probs, open(output_path, 'wb'))
-    pickle.dump(retokenized_sentences, open(retokenized_sentences_output_path, 'wb'))
+    dump_pickle(sentence_probs, output_path)
+    dump_pickle(retokenized_sentences, retokenized_sentences_output_path)
+

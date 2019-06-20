@@ -1,8 +1,12 @@
-# Variational Hierarchical Conversation RNN (VHCR)
-[PyTorch 0.4](https://github.com/pytorch/pytorch) Implementation of ["A Hierarchical Latent Structure for Variational Conversation Modeling"](https://arxiv.org/abs/1804.03424) (NAACL 2018 Oral)
-* [NAACL 2018 Oral Presentation Video](https://vimeo.com/277671819)
+# Neural Chat
+[PyTorch 0.4](https://github.com/pytorch/pytorch) Implementation of Neural Chat ([Approximating Interactive Human Evaluation with Self-Play for Open-Domain Dialog Systems](https://arxiv.org/abs/), [Way Off-Policy Batch Deep Reinforcement Learning of Implicit Human Preferences in Dialog](https://arxiv.org/abs/)). You can interact with the models here: http://neural.chat. 
+
+This code is inspired by and built off of "A Hierarchical Latent Structure for Variational Conversation Modeling" ([code](https://github.com/ctr4si/A-Hierarchical-Latent-Structure-for-Variational-Conversation-Modeling), [paper](https://arxiv.org/abs/1804.03424), [presentation](https://vimeo.com/277671819)). 
 
 ## Prerequisites
+This section includes installation of required libraries, and downloading pre-trained models.
+
+### Installation
 Install Python packages
 ```
 pip install -r requirements.txt
@@ -13,16 +17,54 @@ Setup python path to include repo
 python setup.py develop
 ```
 
-## Download & Preprocess data
-Following scripts will
+### InferSent Setup
 
-1. Create directories `./datasets/cornell/` and `./datasets/ubuntu/` respectively.
+> For more information about InferSent module, see [here](https://github.com/natashamjaques/neural_chat/tree/master/inferSent).
+
+Download [GloVe](https://nlp.stanford.edu/projects/glove/) [2.18GB] (V1) or [fastText](https://fasttext.cc/docs/en/english-vectors.html) [5.83GB] (V2) vectors. We suggest using GloVe:
+```bash
+mkdir inferSent/dataset/GloVe
+curl -Lo inferSent/dataset/GloVe/glove.840B.300d.zip http://nlp.stanford.edu/data/glove.840B.300d.zip
+unzip inferSent/dataset/GloVe/glove.840B.300d.zip -d inferSent/dataset/GloVe/
+
+mkdir inferSent/dataset/fastText
+curl -Lo inferSent/dataset/fastText/crawl-300d-2M.vec.zip https://dl.fbaipublicfiles.com/fasttext/vectors-english/crawl-300d-2M-subword.zip
+unzip inferSent/dataset/fastText/crawl-300d-2M.vec.zip -d inferSent/dataset/fastText/
+```
+
+Download the pre-trained InferSent models (V1 trained with GloVe, V2 trained with fastText) [154MB each]:
+```bash
+curl -Lo inferSent/encoder/infersent1.pickle https://affect.media.mit.edu/neural_chat/inferSent/encoder/infersent1.pickle
+curl -Lo inferSent/encoder/infersent2.pickle https://affect.media.mit.edu/neural_chat/inferSent/encoder/infersent2.pickle
+```
+Note that infersent1 is trained with GloVe (which have been trained on text preprocessed with the PTB tokenizer) and infersent2 is trained with fastText (which have been trained on text preprocessed with the MOSES tokenizer). The latter also removes the padding of zeros with max-pooling which was inconvenient when embedding sentences outside of their batches.
+
+### TorchMoji Setup
+
+> For more information about TorchMoji module, see [here](https://github.com/natashamjaques/neural_chat/tree/master/torchMoji).
+
+Run the download script to downloads the pre-trained torchMoji weights [~85MB] from [here](https://www.dropbox.com/s/q8lax9ary32c7t9/pytorch_model.bin?dl=0) and put them in the `./torchMoji/model/` directory:
+```
+python torchMoji/scripts/download_weights.py
+```
+
+## Download & Preprocess Data
+The following scripts will:
+
+1. Create directories `./datasets/reddit_casual/` and `./datasets/cornell/` respectively.
 
 2. Download and preprocess conversation data inside each directory.
 
-### for [Cornell Movie Dialogue dataset](https://www.cs.cornell.edu/~cristian/Cornell_Movie-Dialogs_Corpus.html)
+### for [Reddit Casual Conversations Dataset](https://www.reddit.com/r/CasualConversation/)
+
+To download the pre-processed dataset [3.72GB], use:
 ```
-python cornell_preprocess.py
+python dataset_preprocess.py --dataset=reddit_casual --shortcut
+```
+
+Alternatively, if you'd like to download a smaller version [24.2MB], and do pre-processing steps on your end, use:
+```
+python dataset_preprocess.py --dataset=reddit_casual
     --max_sentence_length (maximum number of words in sentence; default: 30)
     --max_conversation_length (maximum turns of utterances in single conversation; default: 10)
     --max_vocab_size (maximum size of word vocabulary; default: 20000)
@@ -30,9 +72,16 @@ python cornell_preprocess.py
     --n_workers (number of workers for multiprocessing; default: os.cpu_count())
 ```
 
-### for [Ubuntu Dialog Dataset](http://dataset.cs.mcgill.ca/ubuntu-corpus-1.0/)
+### for [Cornell Movie Dialogue Dataset](https://www.cs.cornell.edu/~cristian/Cornell_Movie-Dialogs_Corpus.html)
+
+To download the pre-processed dataset [3.62GB], use:
 ```
-python ubuntu_preprocess.py
+python dataset_preprocess.py --dataset=cornell --shortcut
+```
+
+Alternatively, if you'd like to download a smaller version [9.9MB], and do pre-processing steps on your end, use:
+```
+python dataset_preprocess.py --dataset=reddit_casual
     --max_sentence_length (maximum number of words in sentence; default: 30)
     --max_conversation_length (maximum turns of utterances in single conversation; default: 10)
     --max_vocab_size (maximum size of word vocabulary; default: 20000)
@@ -40,65 +89,107 @@ python ubuntu_preprocess.py
     --n_workers (number of workers for multiprocessing; default: os.cpu_count())
 ```
 
-### Download pretrained deepmoji model
-
-```
-cd torchMoji
-python scripts/download_weights.py
-```
 
 ## Training
-Go to the model directory and set the save_dir in configs.py (this is where the model checkpoints will be saved)
-
-We provide our implementation of VHCR, as well as our reference implementations for [HRED](https://arxiv.org/abs/1507.02221) and [VHRED](https://arxiv.org/abs/1605.06069).
-
-To run training:
-```
-python train.py --data=<data> --model=<model> --batch_size=<batch_size>
-```
-
-For example:
-1. Train HRED on Cornell Movie:
-```
-python train.py --data=cornell --model=HRED
-```
-
-2. Train VHRED with word drop of ratio 0.25 and kl annealing iterations 250000:
-```
-python train.py --data=ubuntu --model=VHRED --batch_size=40 --word_drop=0.25 --kl_annealing_iter=250000
-```
-
-3. Train VHCR with utterance drop of ratio 0.25:
-```
-python train.py --data=ubuntu --model=VHCR --batch_size=40 --sentence_drop=0.25 --kl_annealing_iter=250000
-```
+Go to the model directory and set the save_dir in configs.py (this is where the model checkpoints will be saved).
 
 By default, it will save a model checkpoint every epoch to <save_dir> and a tensorboard summary.
 For more arguments and options, see config.py.
 
+Note that after training, you should only keep the single optimal checkpoint in the checkpoint directory for 
+[evaluation](#evaluation) and [interaction](#interacting-with-models) steps and remove the 
+remaining checkpoints.
+
+### Training EI (Emotion+Infersent) Models
+
+We provide our implementation of EI (Emotion+Infersent) models built upon implementations for [VHCR](https://arxiv.org/pdf/1804.03424.pdf), [VHRED](https://arxiv.org/abs/1605.06069), and [HRED](https://arxiv.org/abs/1507.02221).
+
+To run training:
+```
+python train.py --data=<data> --model=<model> --batch_size=<batch_size> [--emotion --infersent]
+```
+
+For example:
+1. Train HRED-Infersent-only on Cornell Movie:
+```
+python model/train.py --data=cornell --model=HRED --infersent --infersent_weight=25000 --infersent_embedding_size=128
+```
+
+2. Train VHRED-Emotion-only on Reddit Casual Conversations:
+```
+python model/train.py --data=reddit_casual --model=VHRED --emotion --emo_weight=25 --emo_embedding_size=128
+```
+
+3. Train VHCR-EI on Reddit Casual Conversations:
+```
+python model/train.py --data=reddit_casual --model=VHCR --emotion --infersent --emo_weight=25 --emo_embedding_size=128 --infersent_weight=100000 --infersent_embedding_size=4000
+```
+
+### Training Reinforcement Learning Models
+
+[This section needs work]
+
+First, calculate rewards offline:
+```
+python model/rl/rewards.py --raw --experience_path=<path_to_experience_csv_file> --save_path=<save_path>
+```
+
+Then, run:
+```
+python model/rl/run_rl.py -r 'reward_you' 'reward_what' -rw 2.0 1.5
+```
 
 ## Evaluation
+
 To evaluate the word perplexity:
 ```
-python eval.py --model=<model> --checkpoint=<path_to_your_checkpoint>
+python model/eval.py --mode=<mode> --checkpoint=<path_to_your_checkpoint_directory>
 ```
 
 For embedding based metrics, you need to download [Google News word vectors](https://drive.google.com/file/d/0B7XkCwpI5KDYNlNUTTlSS21pQmM/edit?usp=sharing), unzip it and put it under the datasets folder.
 Then run:
 ```
-python eval_embed.py --model=<model> --checkpoint=<path_to_your_checkpoint>
+python model/eval_embed.py --mode=<mode> --checkpoint=<path_to_your_checkpoint_directory>
 ```
 
+To evaluate sentiment and semantics using distance from torhcmoji and infersent inferred embedding:
+```
+python model/eval_novel.py --mode=<mode> --checkpoint=<path_to_your_checkpoint_directory>
+```
+
+## Interacting with Models
+
+Use the following command to interact with / talk to a saved model checkpoint:
+```
+python model/interact.py --debug --checkpoint=<path_to_your_checkpoint_directory>
+```
 
 ## Reference
+If you use this code or the released Reddit dataset as part of any published research, 
+please reference at least one of the following papers depending on your usage.
 
-If you use this code or dataset as part of any published research, please refer the following paper.
+For interactive evaluation, use of Reddit dataset, miscellaneous use-cases, refer to:
+```
+@article{ghandeharioun2019approximating,
+  title={Approximating Interactive Human Evaluation with Self-Play for Open-Domain Dialog Systems},
+  author={Ghandeharioun, Asma and Shen, Judy and Jaques, Natasha and Ferguson, Craig and Jones, Noah, and Lapedriza, Agata and Picard, Rosalind},
+  journal={arXiv preprint arXiv:},
+  year={2019}
+}
+```
 
+For reinforcement learning in dialog systems, refer to:
 ```
-@inproceedings{VHCR:2018:NAACL,
-    author    = {Yookoon Park and Jaemin Cho and Gunhee Kim},
-    title     = "{A Hierarchical Latent Structure for Variational Conversation Modeling}",
-    booktitle = {NAACL},
-    year      = 2018
-    }
+@article{jaques2019way,
+  title={Way Off-Policy Batch Deep Reinforcement Learning of Implicit Human Preferences in Dialog},
+  author={Jaques, Natasha and Ghandeharioun, Asma and Shen, Judy and Ferguson, Craig and Jones, Noah, and Lapedriza, Agata and Gu, Shixiang and Picard, Rosalind},
+  journal={arXiv preprint arXiv:},
+  year={2019}
+}
 ```
+
+
+### Related Work
+* Park, Y., Cho, J., & Kim, G. (2018, June). [*A Hierarchical Latent Structure for Variational Conversation Modeling*](https://www.aclweb.org/anthology/N18-1162). In Proceedings of the 2018 Conference of the North American Chapter of the Association for Computational Linguistics: Human Language Technologies, Volume 1 (Long Papers) (pp. 1792-1801).
+* Serban, I. V., Sordoni, A., Lowe, R., Charlin, L., Pineau, J., Courville, A., & Bengio, Y. (2017, February). [*A hierarchical latent variable encoder-decoder model for generating dialogues*](https://arxiv.org/pdf/1605.06069.pdf). In Thirty-First AAAI Conference on Artificial Intelligence.
+* Sordoni, A., Bengio, Y., Vahabi, H., Lioma, C., Grue Simonsen, J., & Nie, J. Y. (2015, October). [*A hierarchical recurrent encoder-decoder for generative context-aware query suggestion*](https://arxiv.org/pdf/1507.02221.pdf). In Proceedings of the 24th ACM International on Conference on Information and Knowledge Management (pp. 553-562). ACM.

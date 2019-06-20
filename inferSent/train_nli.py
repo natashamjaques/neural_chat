@@ -5,6 +5,9 @@
 # LICENSE file in the root directory of this source tree.
 #
 
+from inferSent.mutils import get_optimizer
+from inferSent.encoder.models import NLINet
+
 import os
 import sys
 import time
@@ -17,8 +20,6 @@ from torch.autograd import Variable
 import torch.nn as nn
 
 from data import get_nli, get_batch, build_vocab
-from mutils import get_optimizer
-from models import NLINet
 
 
 parser = argparse.ArgumentParser(description='NLI training')
