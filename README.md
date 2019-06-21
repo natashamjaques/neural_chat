@@ -1,5 +1,7 @@
 # Neural Chat
-[PyTorch 0.4](https://github.com/pytorch/pytorch) Implementation of Neural Chat: [Approximating Interactive Human Evaluation with Self-Play for Open-Domain Dialog Systems](https://arxiv.org/abs/). You can interact with the models here: http://neural.chat. 
+[PyTorch 0.4](https://github.com/pytorch/pytorch) Implementation of Neural Chat: [Approximating Interactive Human Evaluation with Self-Play for Open-Domain Dialog Systems](https://arxiv.org/abs/). You can interact with the models here: **http://neural.chat**. 
+
+This repository is accompanied by [Neural Chat Web](https://github.com/asmadotgh/neural_chat_web) to deploy a web server and host the models online.
 
 This code is inspired by and built off of "A Hierarchical Latent Structure for Variational Conversation Modeling" ([code](https://github.com/ctr4si/A-Hierarchical-Latent-Structure-for-Variational-Conversation-Modeling), [paper](https://arxiv.org/abs/1804.03424), [presentation](https://vimeo.com/277671819)). 
 
@@ -57,7 +59,7 @@ The following scripts will:
 
 ### for [Reddit Casual Conversations Dataset](https://www.reddit.com/r/CasualConversation/)
 
-To download the pre-processed dataset [3.72GB], use:
+To download the pre-processed dataset [10.33GB], use:
 ```
 python dataset_preprocess.py --dataset=reddit_casual --shortcut
 ```
@@ -147,6 +149,11 @@ Use the following command to interact with / talk to a saved model checkpoint:
 ```
 python model/interact.py --debug --checkpoint=<path_to_your_checkpoint_directory>
 ```
+
+## Deploying chatbots live on a web server
+This code is accompanied by another repository that implements the server portion of Neural Chat project.
+Please refer to [**Neural Chat Web**](https://github.com/asmadotgh/neural_chat_web) for details on how to deploy your chatbots live on web.
+
 
 ## Reference
 If you use this code or the released Reddit dataset, please reference the following paper:
