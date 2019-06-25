@@ -59,7 +59,7 @@ The following scripts will:
 
 ### for [Reddit Casual Conversations Dataset](https://www.reddit.com/r/CasualConversation/)
 
-To download the pre-processed dataset [10.33GB], use:
+To download the pre-processed dataset [10.31GB], use:
 ```
 python dataset_preprocess.py --dataset=reddit_casual --shortcut
 ```
@@ -76,7 +76,7 @@ python dataset_preprocess.py --dataset=reddit_casual
 
 ### for [Cornell Movie Dialogue Dataset](https://www.cs.cornell.edu/~cristian/Cornell_Movie-Dialogs_Corpus.html)
 
-To download the pre-processed dataset [3.62GB], use:
+To download the pre-processed dataset [3.61GB], use:
 ```
 python dataset_preprocess.py --dataset=cornell --shortcut
 ```
@@ -156,13 +156,13 @@ Please refer to [**Neural Chat Web**](https://github.com/asmadotgh/neural_chat_w
 
 
 ## Reference
-If you use this code or the released Reddit dataset, please reference the following paper:
+If you use this code or the released Reddit dataset, please reference [the following paper](https://arxiv.org/abs/1906.09308):
 
 ```
 @article{ghandeharioun2019approximating,
   title={Approximating Interactive Human Evaluation with Self-Play for Open-Domain Dialog Systems},
   author={Ghandeharioun, Asma and Shen, Judy and Jaques, Natasha and Ferguson, Craig and Jones, Noah, and Lapedriza, Agata and Picard, Rosalind},
-  journal={arXiv preprint arXiv:},
+  journal={arXiv preprint arXiv:1906.09308},
   year={2019}
 }
 ```
