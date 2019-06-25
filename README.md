@@ -168,22 +168,22 @@ python model/interact.py --debug --checkpoint=<path_to_your_checkpoint_directory
 If you use this code or the released Reddit dataset as part of any published research, 
 please reference at least one of the following papers depending on your usage.
 
-For interactive evaluation, use of Reddit dataset, miscellaneous use-cases, refer to:
-```
-@article{ghandeharioun2019approximating,
-  title={Approximating Interactive Human Evaluation with Self-Play for Open-Domain Dialog Systems},
-  author={Ghandeharioun, Asma and Shen, Judy and Jaques, Natasha and Ferguson, Craig and Jones, Noah, and Lapedriza, Agata and Picard, Rosalind},
-  journal={arXiv preprint arXiv:},
-  year={2019}
-}
-```
-
 For reinforcement learning in dialog systems, refer to:
 ```
 @article{jaques2019way,
   title={Way Off-Policy Batch Deep Reinforcement Learning of Implicit Human Preferences in Dialog},
   author={Jaques, Natasha and Ghandeharioun, Asma and Shen, Judy and Ferguson, Craig and Jones, Noah, and Lapedriza, Agata and Gu, Shixiang and Picard, Rosalind},
   journal={arXiv preprint arXiv:},
+  year={2019}
+}
+```
+
+For interactive evaluation, use of Reddit dataset, miscellaneous use-cases, refer to [the following paper](https://arxiv.org/abs/1906.09308):
+```
+@article{ghandeharioun2019approximating,
+  title={Approximating Interactive Human Evaluation with Self-Play for Open-Domain Dialog Systems},
+  author={Ghandeharioun, Asma and Shen, Judy and Jaques, Natasha and Ferguson, Craig and Jones, Noah, and Lapedriza, Agata and Picard, Rosalind},
+  journal={arXiv preprint arXiv:1906.09308},
   year={2019}
 }
 ```
