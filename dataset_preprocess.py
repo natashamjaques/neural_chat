@@ -13,6 +13,8 @@ from tqdm import tqdm
 from model.utils import Tokenizer, Vocab, PAD_TOKEN, SOS_TOKEN, EOS_TOKEN, pad_sentences
 from subprocess import call
 
+import tarfile
+
 project_dir = Path(__file__).resolve().parent
 datasets_dir = project_dir.joinpath('datasets')
 cornell_dir = datasets_dir.joinpath('cornell')
@@ -22,30 +24,53 @@ reddit_casual_dir = datasets_dir.joinpath('reddit_casual')
 tokenizer = Tokenizer('spacy')
 
 
-def shortcut_download(dataset):
+def shortcut_download(dataset, compression_type='tar.gz'):
     """Download and unpack pre-processed dataset"""
 
-    zip_url = f'https://affect.media.mit.edu/neural_chat/datasets/{dataset}_preprocessed.zip'
-    zipfile_dir = datasets_dir.joinpath(dataset)
-    zipfile_path = datasets_dir.joinpath(f'{dataset}_preprocessed.zip')
+    if compression_type not in ['tar.gz', 'zip']:
+        print('Warning! Wrong compression format. Changing to tar.gz')
+        compression_type = 'tar.gz'
+
+    if dataset == 'reddit_casual' and compression_type == 'zip':
+        print('Warning! Zip format is not supported for reddit casual dataset due to file size. Changing to tar.gz')
+        compression_type = 'tar.gz'
 
     if not os.path.exists(datasets_dir):
         os.makedirs(datasets_dir)
 
+    compressed_url = f'https://affect.media.mit.edu/neural_chat/datasets/{dataset}_preprocessed.{compression_type}'
+    compressed_file_dir = datasets_dir.joinpath(dataset)
+    compressed_file_path = datasets_dir.joinpath(f'{dataset}_preprocessed.{compression_type}')
+
     # Prepare Dialog data
-    if not os.path.exists(zipfile_dir):
-        print(f'Downloading {zip_url} to {zipfile_path}')
-        urlretrieve(zip_url, zipfile_path)
-        print(f'Successfully downloaded {zipfile_path}')
+    if not os.path.exists(compressed_file_dir):
+        print(f'Downloading {compressed_url} to {compressed_file_path}')
+        urlretrieve(compressed_url, compressed_file_path)
+        print(f'Successfully downloaded {compressed_file_path}')
 
-        zip_ref = ZipFile(zipfile_path, 'r')
-        zip_ref.extractall(datasets_dir)
-        zip_ref.close()
+        if compression_type == 'tar.gz':
+            tar_ref = tarfile.open(compressed_file_path, 'r:gz')
+            for member in tar_ref.getmembers():
+                try:
+                    tar_ref.extract(member, path=datasets_dir)
+                    print(f'Extracting {member.name}: OK')
+                except Exception as e:
+                    print(f'Extracting {member.name}: ERROR - {e}')
+            tar_ref.close()
+        elif compression_type == 'zip':
+            zip_ref = ZipFile(compressed_file_path, mode='r')
+            for member in zip_ref.infolist():
+                try:
+                    zip_ref.extract(member, path=datasets_dir)
+                    print(f'Extracting {member}: OK')
+                except Exception as e:
+                    print(f'Extracting {member}: ERROR - {e}')
+            zip_ref.close()
 
-        print(f'Successfully extracted {zipfile_path}')
-
+        print(f'Successfully extracted {compressed_file_path}')
     else:
         print('Directory already exists. Aborting download.')
+
 
 
 def prepare_reddit_casual_data():
@@ -265,6 +290,8 @@ if __name__ == '__main__':
     # Bypassing pre-processing by directly downloading all the files
     parser.add_argument('--shortcut', action="store_true", default=False,
                         help="Whether to download the preprocessed dataset instead.")
+    parser.add_argument('--shortcut_compression_type', type=str, default='tar.gz',
+                        help="Whether to process tar.gz or zip files. Defaults to tar.gz.")
 
     args = parser.parse_args()
 
@@ -275,7 +302,7 @@ if __name__ == '__main__':
     n_workers = args.n_workers
 
     if args.shortcut:
-        shortcut_download(args.dataset)
+        shortcut_download(args.dataset, args.shortcut_compression_type)
     else:
         conversations = []
         # Cornell data

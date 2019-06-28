@@ -220,7 +220,7 @@ class DBCQ:
                 raw_text_sentences, debug=debug,
                 max_conversation_length=max_conversation_length)
 
-            # Initialize a tensor for the beam search
+            # Initialize a tensor for beams
             beams = to_var(torch.LongTensor(
                 np.ones((self.rl_config.beam_size, 
                         self.rl_config.max_sentence_length))))

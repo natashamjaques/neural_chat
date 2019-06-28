@@ -59,49 +59,6 @@ class BatchQTuner:
             lr=self.config.learning_rate)
 
         self.set_up_logging()
-    
-    def build_models(self):
-        config = copy.deepcopy(self.config)
-
-        # If loading RL checkpoint, ensure it doesn't try to load the ckpt 
-        # through Solver
-        if self.config.load_rl_ckpt:
-            config.checkpoint = None  
-
-        if self.config.model in VariationalModels:
-            self.q_net = VariationalSolver(
-                config, None, self.eval_data, vocab=self.vocab, is_train=True)
-            self.target_q_net = VariationalSolver(
-                config, None, self.eval_data, vocab=self.vocab, is_train=True)
-        else:
-            self.q_net = Solver(
-                config, None, self.eval_data, vocab=self.vocab, is_train=True)
-            self.target_q_net = Solver(
-                config, None, self.eval_data, vocab=self.vocab, is_train=True)
-        print('Building Q network')
-        self.q_net.build()
-
-        print('\nBuilding Target Q network')
-        self.target_q_net.build()
-
-        if self.config.model in VariationalModels:
-            self.pretrained_prior = VariationalSolver(
-                self.config, None, self.eval_data, vocab=self.vocab, 
-                is_train=True)
-        else:
-            self.pretrained_prior = Solver(
-                self.config, None, self.eval_data, vocab=self.vocab, 
-                is_train=True)
-        print('Building prior network')
-        self.pretrained_prior.build()
-            
-        # Freeze the weights of the prior so it stays constant
-        self.pretrained_prior.model.eval()
-        for params in self.pretrained_prior.model.parameters():
-            params.requires_grad = False
-
-        print('Successfully initialized Q networks')
-        self.t = 0
 
     def q_update(self):
         """General Q learning update."""
@@ -194,9 +151,8 @@ class BatchQTuner:
         q_values = word_q_values.gather(
             1, word_actions.unsqueeze(1)).squeeze()  # [total words]
 
-        prior_rewards = None
-        
         """ Compute KL metrics """
+        prior_rewards = None
 
         # Get probabilities from policy network
         q_dists = torch.nn.functional.softmax(word_q_values, 1)
@@ -363,26 +319,6 @@ class BatchQTuner:
 
         return min_target_q_values
 
-    def run_seq2seq_model(self, q_net, input_conversations, sent_lens, 
-                     target_conversations, conv_lens):
-        # Prepare the batch
-        sentences = [sent for conv in input_conversations for sent in conv]
-        targets = [sent for conv in target_conversations for sent in conv]
-
-        if not (np.all(np.isfinite(sentences)) 
-                and np.all(np.isfinite(targets)) 
-                and np.all(np.isfinite(sent_lens))):
-            print("Input isn't finite")
-
-        sentences = to_var(torch.LongTensor(sentences))
-        targets = to_var(torch.LongTensor(targets))
-        sent_lens = to_var(torch.LongTensor(sent_lens))
-
-        # Run Q network
-        q_outputs = q_net.model(sentences, sent_lens, conv_lens, targets, 
-                                rl_mode=True)
-        return q_outputs[0]  # [num_sentences, max_sentence_len, vocab_size]
-
     def q_learn(self):
         self.q_loss_history = []
         self.q_loss_batch_history = []
@@ -450,6 +386,69 @@ class BatchQTuner:
                 self.save_model(self.t)
 
             self.t += 1
+
+    def build_models(self):
+        config = copy.deepcopy(self.config)
+
+        # If loading RL checkpoint, ensure it doesn't try to load the ckpt 
+        # through Solver
+        if self.config.load_rl_ckpt:
+            config.checkpoint = None  
+
+        if self.config.model in VariationalModels:
+            self.q_net = VariationalSolver(
+                config, None, self.eval_data, vocab=self.vocab, is_train=True)
+            self.target_q_net = VariationalSolver(
+                config, None, self.eval_data, vocab=self.vocab, is_train=True)
+        else:
+            self.q_net = Solver(
+                config, None, self.eval_data, vocab=self.vocab, is_train=True)
+            self.target_q_net = Solver(
+                config, None, self.eval_data, vocab=self.vocab, is_train=True)
+        print('Building Q network')
+        self.q_net.build()
+
+        print('\nBuilding Target Q network')
+        self.target_q_net.build()
+
+        if self.config.model in VariationalModels:
+            self.pretrained_prior = VariationalSolver(
+                self.config, None, self.eval_data, vocab=self.vocab, 
+                is_train=True)
+        else:
+            self.pretrained_prior = Solver(
+                self.config, None, self.eval_data, vocab=self.vocab, 
+                is_train=True)
+        print('Building prior network')
+        self.pretrained_prior.build()
+            
+        # Freeze the weights of the prior so it stays constant
+        self.pretrained_prior.model.eval()
+        for params in self.pretrained_prior.model.parameters():
+            params.requires_grad = False
+
+        print('Successfully initialized Q networks')
+        self.t = 0
+
+    def run_seq2seq_model(self, q_net, input_conversations, sent_lens, 
+                     target_conversations, conv_lens):
+        # Prepare the batch
+        sentences = [sent for conv in input_conversations for sent in conv]
+        targets = [sent for conv in target_conversations for sent in conv]
+
+        if not (np.all(np.isfinite(sentences)) 
+                and np.all(np.isfinite(targets)) 
+                and np.all(np.isfinite(sent_lens))):
+            print("Input isn't finite")
+
+        sentences = to_var(torch.LongTensor(sentences))
+        targets = to_var(torch.LongTensor(targets))
+        sent_lens = to_var(torch.LongTensor(sent_lens))
+
+        # Run Q network
+        q_outputs = q_net.model(sentences, sent_lens, conv_lens, targets, 
+                                rl_mode=True)
+        return q_outputs[0]  # [num_sentences, max_sentence_len, vocab_size]
 
     def write_summary(self, t):
         metrics_to_log = ['epoch_q_loss', 'epoch_sampled_reward', 

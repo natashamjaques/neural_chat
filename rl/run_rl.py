@@ -11,7 +11,7 @@ def parse_config_args():
     
     # Buffer args
     parser.add_argument('--experience_path', type=str, default=None, 
-                        help='Path to a .csv containing experiences')
+                        help='Path to .csv containing batch data / experience')
     parser.add_argument('--raw_buffer', action='store_true',
                         help='Set to True if processing buffer from raw file'
                              'obtained directly from website')
@@ -55,6 +55,9 @@ def parse_config_args():
                              " from different datasets")
     parser.set_defaults(separate_datasets=False)
 
+    # Uses monte carlo estimates to alleviate optimism in target Q values
+    parser.add_argument('--monte_carlo_count', type=int, default=1)
+
     # Training configs
     parser.add_argument('--log_every_n', type=int, default=20)
     parser.add_argument('--save_every_n', type=int, default=200)
@@ -73,9 +76,6 @@ def parse_config_args():
                         help='Indicates that an RL checkpoint should be loaded')
     parser.set_defaults(load_rl_ckpt=False)
     parser.add_argument('--rl_ckpt_epoch', type=int, default=None)
-
-    # Uses monte carlo estimates to alleviate optimism in target Q values
-    parser.add_argument('--monte_carlo_count', type=int, default=1)
 
     return vars(parser.parse_args())
 

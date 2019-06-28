@@ -11,7 +11,7 @@
     An example job file format is as follows:
 
         cornell_HRED
-        ['emotion', 'infersent', 'emoinfer', 'input_only']
+        ['baseline', emotion', 'infersent', 'emoinfer']
         --data=cornell --model=HRED --emo_weight=25 --infersent_weight=30000
         --encoder_hidden_size=[400,600,800] --decoder_hidden_size=[400,600,800]
         in_order
@@ -247,7 +247,9 @@ class JobGroup:
 
 
 def get_model_type_hparams(model_type):
-    if model_type == 'emotion':
+    if model_type == 'baseline':
+        return ""
+    elif model_type == 'emotion':
         return "--emotion"
     elif model_type == 'infersent':
         return "--infersent"
