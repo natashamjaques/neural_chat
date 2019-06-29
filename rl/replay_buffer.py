@@ -7,12 +7,13 @@ from datetime import datetime
 
 from model.utils import Vocab, Tokenizer, pad_tokens, detokenize
 
-# String names of columns for s, a, r, s'
+# String names of columns for action and next state
 STUDY_COL = 'Study Key'
 DATETIME_COL = 'Datetime'
 CHAT_ID_COL = 'Chat ID'
-BOT_RESPONSE_COL = 'Response'
-USER_INPUT_COL = 'Message'
+BOT_RESPONSE_COL = 'Response'  # Action
+USER_INPUT_COL = 'Message'  # Used as part of next state
+MODEL_ID = 'Chatbot ID'
 BAD_BOTS = ['bot1', 'bot2', 'bot3', 'bot4', 'pretzel']
 
 
@@ -210,7 +211,7 @@ def process_raw_csv(df, max_convo_len=10):
 
     # Remove bad bots
     for bot in BAD_BOTS:
-        df = df[df['Chatbot ID'] != bot]
+        df = df[df[MODEL_ID] != bot]
 
     conversations = df[CHAT_ID_COL].unique()
 

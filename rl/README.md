@@ -14,28 +14,33 @@ Interaction data was collected using http://neural.chat. To deploy your own mode
 See the top level README for libraries and installation instructions.
 
 ## Data format
-Data for the 
+The raw batch of interaction data is provided as a .csv with columns for the actions and user response. The names of the columns are specified at the top of the file. After preprocessing, the model saves the cleaned, tokenized inputs into the columns *state*, *action*, *next_state*, and *done*.
+
+### Extracting rewards
+In our case, we use the human responses to extract different reward functions using the file ```rewards.py```. Each reward function is added as a column to the .csv file, and all reward columns start with the prefix 'reward_'. To preprocess and compute rewards, use:
+
+```
+python rl/rewards.py --raw --experience_path=<path_to_experience_csv_file> --save_path=<save_path>
+```
 
 ## Training
+Once you've computed the rewards, you can train the RL model using the processed .csv and your pretrained checkpoint. Be sure to specify which reward columns to use and how much to weight each column, as follows:
 
-
-### Rewards
-
-First, calculate rewards offline:
 ```
-python model/rl/rewards.py --raw --experience_path=<path_to_experience_csv_file> --save_path=<save_path>
+python rl/run_rl.py --checkpoint=<path_to_your_checkpoint_directory> --experience_path=<path_to_processed_csv> -r 'reward_deepmoji' 'reward_answer_length_words' -w 0.5 0.5
 ```
 
-Then, run:
+The file ```run_rl.py``` shows how to add hyperparameters for KL-control, etc. The best performing model uses KL-control with Psi-learning and monte carlo targets, as follows:
+
 ```
-python model/rl/run_rl.py -r 'reward_you' 'reward_what' -rw 2.0 1.5
+python rl/run_rl.py --checkpoint=<path_to_your_checkpoint_directory> --experience_path=<path_to_processed_csv> -r 'reward_deepmoji' 'reward_answer_length_words' -w 0.5 0.5 --monte_carlo_count=5 --kl_control --kl_weight_c 0.5 --psi_learning
 ```
 
 ## Interacting with RL Models
 
 Use the following command to interact with / talk to a saved model checkpoint:
 ```
-python model/interact.py --debug --checkpoint=<path_to_your_checkpoint_directory>
+python model/interact.py --debug --load_rl_ckpt --checkpoint=<path_to_your_checkpoint_directory>
 ```
 
 ## Reference
