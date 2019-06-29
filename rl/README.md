@@ -35,7 +35,8 @@ The file ```run_rl.py``` shows how to add hyperparameters for KL-control, etc. T
 
 ```
 python rl/run_rl.py --checkpoint=<path_to_your_checkpoint_directory> --experience_path=<path_to_processed_csv> \
-    -r 'reward_deepmoji' 'reward_answer_length_words' -w 0.5 0.5 --monte_carlo_count=5 --kl_control --kl_weight_c 0.5 --psi_learning
+    -r 'reward_deepmoji' 'reward_answer_length_words' -w 0.5 0.5 \
+    --monte_carlo_count=5 --kl_control --kl_weight_c 0.5 --psi_learning
 ```
 
 ## Interacting with RL Models
