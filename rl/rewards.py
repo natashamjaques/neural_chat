@@ -22,8 +22,25 @@ from pathlib import Path
 
 import gensim
 import nltk
-ROOT_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+ROOT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 word2vec_path = os.path.join(os.path.join(ROOT_DIR, 'datasets'), 'GoogleNews-vectors-negative300.bin')
+
+
+def parse_args():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--experience_path', type=str, default=None,
+                        help='Path to a .csv containing experiences')
+    parser.add_argument('--save_path', type=str, default=None,
+                        help='Path to save csv with computed reward')
+    parser.add_argument('--raw', action='store_true',
+                        help='Set to True if processing raw file from website')
+    parser.set_defaults(raw=False)
+    parser.add_argument('--discount', type=float, default=0.95)
+    parser.add_argument('--infersent_data', type=str, default='cornell',
+                        help='Dataset to use for infersent model')
+    parser.add_argument('--study_key', type=str, default=None,
+                        help='Limit analysis to a particular study')
+    return parser.parse_args()
 
 
 def _get_emojis_to_rewards_dict():
@@ -53,7 +70,7 @@ def _get_emojis_to_rewards_dict():
         ':triumph:': -0.75, ':confounded:': -0.75,
 
         # very strongly negative
-        ':unamused:': -1, ':angry:': -1,  # removing ':hand:': -1 due to ambiguity
+        ':unamused:': -1, ':angry:': -1,
         ':rage:': -1
     }
     return emojis_to_rewards
@@ -66,23 +83,6 @@ def _get_reward_multiplier():
         loc = EMOJIS.index(emoji)
         reward_multiplier[loc] = reward_val
     return reward_multiplier
-
-
-def parse_args():
-    parser = argparse.ArgumentParser()
-    parser.add_argument('--experience_path', type=str, default=None,
-                        help='Path to a .csv containing experiences')
-    parser.add_argument('--save_path', type=str, default=None,
-                        help='Path to save csv with computed reward')
-    parser.add_argument('--raw', action='store_true',
-                        help='Set to True if processing a raw file from website')
-    parser.set_defaults(raw=False)
-    parser.add_argument('--discount', type=float, default=0.95)
-    parser.add_argument('--infersent_data', type=str, default='cornell',
-                        help='Dataset to use for infersent model')
-    parser.add_argument('--study_key', type=str, default=None,
-                        help='Limit analysis to a particular study')
-    return parser.parse_args()
 
 
 def normalize_01(x):
@@ -111,12 +111,13 @@ def discount_rewards(r, gamma):
 
 
 def cosine_similarity(a, b):
-    # return np.dot(a, b) / (norm(a) * norm(b))
-    return np.sum(a * b, axis=1) / np.sqrt((np.sum(a * a, axis=1) * np.sum(b * b, axis=1)))
+    return np.sum(a * b, axis=1) / np.sqrt(
+        (np.sum(a * a, axis=1) * np.sum(b * b, axis=1)))
 
 
 def reward_you(csv_buff):
-    """Allocates reward for any sentence that contains the reward 'you'. Used for debugging"""
+    """Allocates reward for any sentence that contains the reward 'you'. 
+    Simple reward used for debugging"""
     print("Computing reward_you")
     rewards = [1 if 'you' in r else 0 for r in csv_buff.buffer['Response']]
     csv_buff.buffer['reward_you'] = normalize_01(rewards)
@@ -204,7 +205,8 @@ def reward_manual_ratings(csv_buff):
     return csv_buff
 
 
-# caveats: if the sentiment is negative, it may only be because of the topic, not the person being unhappy with the bot
+# caveats: if the sentiment is negative, it may only be because of the topic, 
+# not the person being unhappy with the bot
 def reward_deepmoji(csv_buff):
     """Allocates reward based on deepmoji sentiment of user response"""
     print("Computing reward_deepmoji")
@@ -225,14 +227,17 @@ def reward_deepmoji(csv_buff):
 
 
 def reward_deepmoji_coherence(csv_buff, botmoji=None):
-    """Allocates reward for coherence between user input and bot response in DeepMoji prediction vector space"""
+    """Allocates reward for coherence between user input and bot response in 
+    DeepMoji prediction vector space"""
     print("Computing reward_deepmoji_coherence")
     if not botmoji:
         botmoji = Botmoji()
 
     user_queries = [x[-1] for x in csv_buff.buffer['state'].tolist()]
     bot_answers = csv_buff.buffer['action'].tolist()
-    assert (len(bot_answers) == len(user_queries)), "Different number of user queries and bot answers"
+
+    assert_msg = "Different number of user queries and bot answers"
+    assert (len(bot_answers) == len(user_queries)), assert_msg
 
     user_emojis = botmoji.encode_multiple(user_queries)
     bot_emojis = botmoji.encode_multiple(bot_answers)
@@ -243,7 +248,8 @@ def reward_deepmoji_coherence(csv_buff, botmoji=None):
 
 
 def reward_infersent_coherence(csv_buff, dataset):
-    """Allocates reward for coherence between user input and bot response in Infersent embedding space"""
+    """Allocates reward for coherence between user input and bot response in 
+    Infersent embedding space"""
     print("Computing reward_infersent_coherence")
     repo_dir = Path(ROOT_DIR)
     dataset_dir = repo_dir.joinpath('datasets', dataset, 'train')
@@ -251,7 +257,9 @@ def reward_infersent_coherence(csv_buff, dataset):
 
     user_queries = [x[-1] for x in csv_buff.buffer['state'].tolist()]
     bot_answers = csv_buff.buffer['action'].tolist()
-    assert (len(bot_answers) == len(user_queries)), "Different number of user queries and bot answers"
+
+    assert_msg = "Different number of user queries and bot answers"
+    assert (len(bot_answers) == len(user_queries)), assert_msg
 
     user_embed = botsent.encode_multiple(user_queries)
     bot_embed = botsent.encode_multiple(bot_answers)
@@ -266,7 +274,8 @@ def reward_infersent_coherence(csv_buff, dataset):
 
 def reward_user_emotional_transition(csv_buff, botmoji=None):
     """Allocates reward for improvement in the sentiment of the user
-    on a turn-by-turn basis, by calculating a weighted sum over the change of deepmoji softmax values."""
+    on a turn-by-turn basis, by calculating a weighted sum over the change of 
+    deepmoji softmax values."""
     print("Computing reward_user_emotional_transition")
 
     reward_multiplier = _get_reward_multiplier()
@@ -276,7 +285,8 @@ def reward_user_emotional_transition(csv_buff, botmoji=None):
     user_queries = [x[-1] for x in csv_buff.buffer['state'].tolist()]
     future_user_queries = [x[-1] for x in csv_buff.buffer['next_state'].tolist()]
 
-    assert (len(future_user_queries) == len(user_queries)), "Different number of user queries and future user queries"
+    assert_msg = "Different number of user queries and future user queries"
+    assert (len(future_user_queries) == len(user_queries)), assert_msg
 
     user_emojis = botmoji.encode_multiple(user_queries)
     future_user_emojis = botmoji.encode_multiple(future_user_queries)
@@ -288,7 +298,8 @@ def reward_user_emotional_transition(csv_buff, botmoji=None):
 
 
 def reward_user_min_max_emotion_transition(csv_buff, botmoji=None):
-    """Allocates reward for change in emotional tone of user response between min and max points of conversation."""
+    """Allocates reward for change in emotional tone of user response between 
+    min and max points of conversation."""
     print("Computing reward_user_min_max_emotion_transition")
 
     if 'reduced_deepmoji' not in csv_buff.buffer.columns:
@@ -299,7 +310,8 @@ def reward_user_min_max_emotion_transition(csv_buff, botmoji=None):
     for chat_id in df['Chat ID'].unique():
         conv = df[df['Chat ID'] == chat_id]
         conv = conv.sort_values('Datetime').reset_index(drop=False)
-        conv_sorted_deepmoji = conv.sort_values('reduced_deepmoji').reset_index(drop=True)
+        conv_sorted_deepmoji = conv.sort_values('reduced_deepmoji').reset_index(
+            drop=True)
         
         min_emo = conv_sorted_deepmoji['reduced_deepmoji'].iloc[0]
         max_emo = conv_sorted_deepmoji['reduced_deepmoji'].iloc[-1]
@@ -341,7 +353,8 @@ def reward_user_var_emotion(csv_buff, botmoji=None):
 
 
 def reward_user_auc_emotion_transition(csv_buff, botmoji=None):
-    """Allocates reward for positive AUC for shift in emotional tone of user responses."""
+    """Allocates reward for positive AUC for shift in emotional tone of user 
+    responses."""
     print("Computing reward_user_auc_emotion_transition")
 
     if 'reward_user_emotional_transition' not in csv_buff.buffer.columns:
@@ -394,7 +407,8 @@ def reward_traditional_embedding_metrics(csv_buff):
     bot_answers = [nltk.word_tokenize(sent) for sent in bot_answers]
 
     print('Loading word2vec model')
-    word2vec = gensim.models.KeyedVectors.load_word2vec_format(word2vec_path, binary=True)
+    word2vec = gensim.models.KeyedVectors.load_word2vec_format(word2vec_path, 
+                                                               binary=True)
     keys = word2vec.vocab
 
     print('Calculating distances')
