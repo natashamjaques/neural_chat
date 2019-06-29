@@ -1,5 +1,5 @@
 # Neural Chat
-[PyTorch 0.4](https://github.com/pytorch/pytorch) Implementation of Neural Chat: [Approximating Interactive Human Evaluation with Self-Play for Open-Domain Dialog Systems](https://arxiv.org/abs/). You can interact with the models here: **http://neural.chat**. 
+[PyTorch 0.4](https://github.com/pytorch/pytorch) Implementation of Neural Chat: [Approximating Interactive Human Evaluation with Self-Play for Open-Domain Dialog Systems](https://arxiv.org/abs/1906.09308). You can interact with the models here: **http://neural.chat**. 
 
 This repository is accompanied by [Neural Chat Web](https://github.com/asmadotgh/neural_chat_web) to deploy a web server and host the models online.
 
