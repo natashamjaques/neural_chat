@@ -43,48 +43,6 @@ def parse_args():
     return parser.parse_args()
 
 
-def _get_emojis_to_rewards_dict():
-    # How detected emojis map to rewards
-    emojis_to_rewards = {
-        # very strongly positive
-        ':kissing_heart:': 1, ':thumbsup:': 1, ':ok_hand:': 1,
-        ':smile:': 1,
-
-        # strongly positive
-        ':blush:': 0.75, ':wink:': 0.75, ':muscle:': 0.75,
-        ':grin:': 0.75, ':heart_eyes:': 0.75, ':100:': 0.75,
-
-        # positive
-        ':smirk:': 0.5, ':stuck_out_tongue_winking_eye:': 0.5,
-        ':sunglasses:': 0.5, ':relieved:': 0.5, ':relaxed:': 0.5,
-        ':blue_heart:': 0.5, ':two_hearts:': 0.5, ':heartbeat:': 0.5,
-        ':yellow_heart:': 0.5,
-
-        # negative
-        ':disappointed:': -0.5, ':eyes:': -0.5,
-        ':expressionless:': -0.5, ':sleeping:': -0.5,
-        ':grimacing:': -0.5,
-
-        # strongly negative
-        ':neutral_face:': -0.75, ':confused:': -0.75,
-        ':triumph:': -0.75, ':confounded:': -0.75,
-
-        # very strongly negative
-        ':unamused:': -1, ':angry:': -1,
-        ':rage:': -1
-    }
-    return emojis_to_rewards
-
-
-def _get_reward_multiplier():
-    emojis_to_rewards = _get_emojis_to_rewards_dict()
-    reward_multiplier = np.zeros(len(EMOJIS))
-    for emoji, reward_val in emojis_to_rewards.items():
-        loc = EMOJIS.index(emoji)
-        reward_multiplier[loc] = reward_val
-    return reward_multiplier
-
-
 def normalize_01(x):
     x = np.array(x)
     min_x = min(x)
@@ -203,6 +161,48 @@ def reward_manual_ratings(csv_buff):
     rewards = csv_buff.buffer['Response Rating'].tolist()
     csv_buff.buffer['reward_manual_ratings'] = normalize_z(rewards)
     return csv_buff
+
+
+def _get_emojis_to_rewards_dict():
+    # How detected emojis map to rewards
+    emojis_to_rewards = {
+        # very strongly positive
+        ':kissing_heart:': 1, ':thumbsup:': 1, ':ok_hand:': 1,
+        ':smile:': 1,
+
+        # strongly positive
+        ':blush:': 0.75, ':wink:': 0.75, ':muscle:': 0.75,
+        ':grin:': 0.75, ':heart_eyes:': 0.75, ':100:': 0.75,
+
+        # positive
+        ':smirk:': 0.5, ':stuck_out_tongue_winking_eye:': 0.5,
+        ':sunglasses:': 0.5, ':relieved:': 0.5, ':relaxed:': 0.5,
+        ':blue_heart:': 0.5, ':two_hearts:': 0.5, ':heartbeat:': 0.5,
+        ':yellow_heart:': 0.5,
+
+        # negative
+        ':disappointed:': -0.5, ':eyes:': -0.5,
+        ':expressionless:': -0.5, ':sleeping:': -0.5,
+        ':grimacing:': -0.5,
+
+        # strongly negative
+        ':neutral_face:': -0.75, ':confused:': -0.75,
+        ':triumph:': -0.75, ':confounded:': -0.75,
+
+        # very strongly negative
+        ':unamused:': -1, ':angry:': -1,
+        ':rage:': -1
+    }
+    return emojis_to_rewards
+
+
+def _get_reward_multiplier():
+    emojis_to_rewards = _get_emojis_to_rewards_dict()
+    reward_multiplier = np.zeros(len(EMOJIS))
+    for emoji, reward_val in emojis_to_rewards.items():
+        loc = EMOJIS.index(emoji)
+        reward_multiplier[loc] = reward_val
+    return reward_multiplier
 
 
 # caveats: if the sentiment is negative, it may only be because of the topic, 

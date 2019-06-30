@@ -9,7 +9,7 @@ def parse_config_args():
     # Must provide checkpoint of pre-trained model to load
     parser.add_argument('--checkpoint', type=str, default=None)
     
-    # Buffer args
+    # Info about where batch data is located and whether it needs preprocessing
     parser.add_argument('--experience_path', type=str, default=None, 
                         help='Path to .csv containing batch data / experience')
     parser.add_argument('--raw_buffer', action='store_true',
@@ -18,7 +18,7 @@ def parse_config_args():
     parser.set_defaults(raw=False)
 
     # RL rewards 
-    # use: python run_rl.py -r 'reward_you' 'reward_what' -rw 2.0 1.5
+    # e.g: python run_rl.py -r 'reward_you' 'reward_what' -rw 2.0 1.5
     parser.add_argument('-r','--rewards', nargs='+',
                         help='<Required> List of reward functions to combine', )
     parser.add_argument('-w','--reward_weights', nargs='+',
@@ -58,7 +58,7 @@ def parse_config_args():
     # Uses monte carlo estimates to alleviate optimism in target Q values
     parser.add_argument('--monte_carlo_count', type=int, default=1)
 
-    # Training configs
+    # Training and logging configs
     parser.add_argument('--log_every_n', type=int, default=20)
     parser.add_argument('--save_every_n', type=int, default=200)
     parser.add_argument('--experiment_name', type=str, default=None)

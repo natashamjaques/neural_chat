@@ -14,7 +14,7 @@ CHAT_ID_COL = 'Chat ID'
 BOT_RESPONSE_COL = 'Response'  # Action
 USER_INPUT_COL = 'Message'  # Used as part of next state
 MODEL_ID = 'Chatbot ID'
-BAD_BOTS = ['bot1', 'bot2', 'bot3', 'bot4', 'pretzel']
+BAD_BOTS = []  # Remove data from these bots
 
 
 class CsvReplayBuffer(object):

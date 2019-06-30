@@ -1,3 +1,5 @@
+""" This code implements Q-learning from a static batch of data with KL-control,
+monte-carlo target Q-value estimation, Psi-learning, and model averaging."""
 import sys
 import os
 import copy

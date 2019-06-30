@@ -1,3 +1,4 @@
+"""Implements a discrete version of Batch Constrained Q learning."""
 import argparse
 import os
 import pickle
