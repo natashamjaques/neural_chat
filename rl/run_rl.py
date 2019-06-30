@@ -1,6 +1,6 @@
 import argparse
 from model.configs import get_config_from_dir
-from batch_q_tune import BatchQTuner
+from way_off_policy_batch_rl import BatchQ
 
 
 def parse_config_args():
@@ -106,7 +106,7 @@ if __name__ == '__main__':
     kwargs_dict['mode'] = 'valid'
     val_config = get_config_from_dir(kwargs_dict['checkpoint'], **kwargs_dict)
 
-    bqt = BatchQTuner(config, val_config=val_config)
+    bqt = BatchQ(config, val_config=val_config)
 
     if config.rl_mode == 'train':
         bqt.q_learn()

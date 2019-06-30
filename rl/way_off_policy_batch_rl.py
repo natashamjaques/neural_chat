@@ -25,7 +25,7 @@ import replay_buffer
 import rewards
 
 
-class BatchQTuner:
+class BatchQ:
     def __init__(self, config, val_config):
         self.config = config
         self.val_config = val_config

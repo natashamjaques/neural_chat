@@ -11,7 +11,7 @@ These options can be toggled using the hyperparameter settings in ```run_rl.py``
 Interaction data was collected using http://neural.chat. To deploy your own model on the web, please see the related repo https://github.com/asmadotgh/neural_chat_web.
 
 ## Prerequisites
-See the top level README for libraries and installation instructions.
+See the top level README for libraries and installation instructions. You will need to make sure Infersent, TorchMoji, and the Google News Vectors are all installed and downloaded in order to compute the existing rewards.
 
 ## Data format
 The raw batch of interaction data is provided as a .csv with columns for the actions and user response. The names of the columns are specified at the top of the file, and can be changed to suit your data. After preprocessing, the model saves the cleaned, tokenized inputs into the columns *state*, *action*, *next_state*, and *done*.
