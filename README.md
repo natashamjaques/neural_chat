@@ -156,8 +156,17 @@ Please refer to [**Neural Chat Web**](https://github.com/asmadotgh/neural_chat_w
 
 
 ## Reference
-If you use this code or the released Reddit dataset, please reference [the following paper](https://arxiv.org/abs/1906.09308):
+If you use this code or the released Reddit dataset, please reference one of the following papers:
 
+For reinforcement learning in dialog systems, refer to:
+```
+@article{jaques2019way,
+  title={Way Off-Policy Batch Deep Reinforcement Learning of Implicit Human Preferences in Dialog},
+  author={Jaques, Natasha and Ghandeharioun, Asma and Shen, Judy and Ferguson, Craig and Jones, Noah, and Lapedriza, Agata and Gu, Shixiang and Picard, Rosalind},
+  journal={arXiv preprint arXiv:},
+```
+
+For interactive evaluation, use of Reddit dataset, miscellaneous use-cases, refer to [the following paper](https://arxiv.org/abs/1906.09308):
 ```
 @article{ghandeharioun2019approximating,
   title={Approximating Interactive Human Evaluation with Self-Play for Open-Domain Dialog Systems},
