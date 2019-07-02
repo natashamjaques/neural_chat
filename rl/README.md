@@ -1,6 +1,6 @@
 # Way Off-Policy Batch Deep Reinforcement Learning of Implicit Human Preferences in Dialog
 
-This code supports training conversational dialog models from a static batch of data (with no exploration) using Q-learning and KL-control, as described in this [paper](https://arxiv.org/abs/). The main file is ```way_off_policy_batch_rl.py```, which is invoked using ```run_rl.py```. Using a pre-trained model checkpoint, and a .csv file of interaction data, the file samples batches of data from a replay buffer and trains with respect to the Q-learning loss. Several enhancements enable better learning:
+This code supports training conversational dialog models from a static batch of data (with no exploration) using Q-learning and KL-control, as described in this [paper](https://arxiv.org/abs/1907.00456). The main file is ```way_off_policy_batch_rl.py```, which is invoked using ```run_rl.py```. Using a pre-trained model checkpoint, and a .csv file of interaction data, the file samples batches of data from a replay buffer and trains with respect to the Q-learning loss. Several enhancements enable better learning:
   * KL-control to penalize divergence from the pre-trained prior.
   * Psi-learning, which uses a logsumexp instead of a max over the estimated future reward. Equivalent to entropy maximization and important for generating diverse samples.
   * Model averging, which allows you to use an aggregated prior computed by averaging the predictions of several models. This can be pre-computed using ```model_averaging.py```
@@ -52,7 +52,7 @@ If you use this code, please cite our work:
 @article{jaques2019way,
   title={Way Off-Policy Batch Deep Reinforcement Learning of Implicit Human Preferences in Dialog},
   author={Jaques, Natasha and Ghandeharioun, Asma and Shen, Judy and Ferguson, Craig and Jones, Noah, and Lapedriza, Agata and Gu, Shixiang and Picard, Rosalind},
-  journal={arXiv preprint arXiv:},
+  journal={arXiv preprint arXiv:1907.00456},
   year={2019}
 }
 ```
