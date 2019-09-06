@@ -5,6 +5,7 @@ metrics_and_analysis/training_results
 model/results
 checkpoints/
 UniversalSentenceEncoder/*
+!UniversalSentenceEncoder/*.py
 model/results
 /fonts/
 *.png
