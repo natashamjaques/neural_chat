@@ -4,6 +4,7 @@ metrics_and_analysis/web_data
 metrics_and_analysis/training_results
 model/results
 checkpoints/
+UniversalSentenceEncoder/*
 model/results
 /fonts/
 *.png
