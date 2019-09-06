@@ -6,6 +6,7 @@ model/results
 checkpoints/
 UniversalSentenceEncoder/*
 !UniversalSentenceEncoder/*.py
+!ParlAI/*
 model/results
 /fonts/
 *.png
