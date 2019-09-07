@@ -76,7 +76,10 @@ class BaseRNNDecoder(nn.Module):
         else:
             # x: [batch_size] - word index (next input)
             _, x = out.max(dim=1)
-        return x
+
+        # prob: [batch_size] - prob of picking x
+        prob = torch.gather(self.softmax(out / self.temperature), 1, x.unsqueeze(1))
+        return x, prob
 
     def forward(self):
         """Base forward function to inherit"""
@@ -270,7 +273,7 @@ class DecoderRNN(BaseRNNDecoder):
         return out, h
 
     def forward(self, inputs, init_h=None, encoder_outputs=None, input_valid_length=None,
-                decode=False):
+                decode=False, return_probs=True):
         """
         Train (decode=False)
             Args:
@@ -312,6 +315,7 @@ class DecoderRNN(BaseRNNDecoder):
             return torch.stack(out_list, dim=1)
         else:
             x_list = []
+            x_probs = []
             for i in range(self.max_unroll):
 
                 # x: [batch_size]
@@ -322,8 +326,12 @@ class DecoderRNN(BaseRNNDecoder):
 
                 # out: [batch_size, vocab_size]
                 # => x: [batch_size]
-                x = self.decode(out)
+                x, prob = self.decode(out)
                 x_list.append(x)
+                x_probs.append(prob)
 
             # [batch_size, max_target_len]
-            return torch.stack(x_list, dim=1)
+            if return_probs:
+                return torch.stack(x_list, dim=1), torch.stack(x_probs, dim=1)
+            else:
+                return torch.stack(x_list, dim=1)
