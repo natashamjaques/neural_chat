@@ -3,9 +3,9 @@ import torch.nn as nn
 from model.utils import to_var, pad, normal_kl_div, normal_logpdf, bag_of_words_loss, to_bow, EOS_ID, detokenize
 import model.layers as layers
 import numpy as np
-import random
 
 VariationalModels = ['VHRED', 'VHCR']
+
 
 class HRED(nn.Module):
     def __init__(self, config):
@@ -53,7 +53,7 @@ class HRED(nn.Module):
 
         if config.tie_embedding:
             self.decoder.embedding = self.encoder.embedding
-        
+
         if config.emotion:
             self.context2emoji = layers.FeedForward(
                 config.context_size, config.emo_output_size,
@@ -160,8 +160,8 @@ class HRED(nn.Module):
             # [batch_size, beam_size, max_unroll]
             return prediction, emoji_preds, infersent_preds
 
-    def generate(self, context, sentence_length, n_context, 
-                 extra_context_inputs=None, botsent=None, botmoji=None, 
+    def generate(self, context, sentence_length, n_context,
+                 extra_context_inputs=None, botsent=None, botmoji=None,
                  vocab=None):
         # context: [batch_size, n_context, seq_len]
         batch_size = context.size(0)
@@ -207,7 +207,7 @@ class HRED(nn.Module):
 
             context_inputs_2d = raw_encoder_hidden.transpose(
                 1, 0).contiguous().view(batch_size, -1)
-            
+
             # Dynamically assess the DeepMoji and Infersent predictions on
             # generated text
             if self.config.context_input_only:
@@ -239,15 +239,15 @@ class VHRED(nn.Module):
         context_input_size = (config.num_layers
                               * config.encoder_hidden_size
                               * self.encoder.num_directions)
-        posterior_input_size = (config.num_layers 
-                                * config.encoder_hidden_size 
-                                * self.encoder.num_directions 
+        posterior_input_size = (config.num_layers
+                                * config.encoder_hidden_size
+                                * self.encoder.num_directions
                                 + config.context_size)
 
         if config.context_input_only:
             context_input_size += (config.emo_output_size
                                    + config.infersent_output_size)
-            posterior_input_size += (config.emo_output_size 
+            posterior_input_size += (config.emo_output_size
                                      + config.infersent_output_size)
 
         self.context_encoder = layers.ContextRNN(context_input_size,
@@ -310,7 +310,7 @@ class VHRED(nn.Module):
                 num_layers=config.emo_num_layers,
                 hidden_size=config.emo_embedding_size,
                 activation=config.emo_activation)
-        
+
         if config.infersent:
             self.context2infersent = layers.FeedForward(
                 config.context_size, config.infersent_output_size,
@@ -339,8 +339,8 @@ class VHRED(nn.Module):
         bow_loss = bag_of_words_loss(bow_logits, target_bow)
         return bow_loss
 
-    def forward(self, sentences, sentence_length, input_conversation_length, 
-                target_sentences, decode=False, extra_context_inputs=None, 
+    def forward(self, sentences, sentence_length, input_conversation_length,
+                target_sentences, decode=False, extra_context_inputs=None,
                 rl_mode=False):
         """
         Args:
@@ -398,7 +398,7 @@ class VHRED(nn.Module):
             discriminator_input = context_outputs.detach()
         else:
             discriminator_input = context_outputs
-        
+
         # Predict emojis using discriminator.
         emoji_preds = None
         if self.config.emotion:
@@ -425,7 +425,10 @@ class VHRED(nn.Module):
         else:
             z_sent = mu_prior + torch.sqrt(var_prior) * eps
             kl_div = None
-            log_p_z = normal_logpdf(z_sent, mu_prior, var_prior).sum()
+            # Manager action. Detach since it's a sampled action.
+            # Gradients flow through mu and Sigma but not z
+            log_p_z_sent = normal_logpdf(z_sent.detach(), mu_prior, var_prior)
+            log_p_z = log_p_z_sent.sum()
             log_q_zx = None
 
         self.z_sent = z_sent
@@ -439,23 +442,36 @@ class VHRED(nn.Module):
         # train: [batch_size, seq_len, vocab_size]
         # eval: [batch_size, seq_len]
         if rl_mode or not decode:
+            # Batch RL step or MLE pre-training step
             decoder_outputs = self.decoder(target_sentences,
                                            init_h=decoder_init,
                                            decode=decode)
 
-            return (decoder_outputs, kl_div, log_p_z, log_q_zx, 
+            return (decoder_outputs, kl_div, log_p_z, log_q_zx,
                     emoji_preds, infersent_preds)
+
+        if rl_mode and decode:
+            # VHRL or REINFORCE step
+            # prediction: [num_sents, max_sent_len]
+            # word_probs: [num_sents, max_sent_len]
+            prediction, word_probs = self.decoder(inputs=None,
+                                                  init_h=decoder_init,
+                                                  decode=decode,
+                                                  return_probs=True)
+
+            return (prediction, kl_div, log_p_z, log_q_zx,
+                    emoji_preds, infersent_preds, word_probs, log_p_z_sent)
 
         else:
             # prediction: [batch_size, beam_size, max_unroll]
             prediction, final_score, length = self.decoder.beam_decode(
                 init_h=decoder_init)
 
-            return (prediction, kl_div, log_p_z, log_q_zx, 
+            return (prediction, kl_div, log_p_z, log_q_zx,
                     emoji_preds, infersent_preds)
 
-    def generate(self, context, sentence_length, n_context, 
-                 extra_context_inputs=None, botmoji=None, botsent=None, 
+    def generate(self, context, sentence_length, n_context,
+                 extra_context_inputs=None, botmoji=None, botsent=None,
                  vocab=None):
         # context: [batch_size, n_context, seq_len]
         batch_size = context.size(0)
@@ -546,18 +562,18 @@ class VHCR(nn.Module):
         context_inference_size = (config.num_layers
                               * config.encoder_hidden_size
                               * self.encoder.num_directions)
-        posterior_input_size = (config.num_layers 
-                                * config.encoder_hidden_size 
-                                * self.encoder.num_directions 
+        posterior_input_size = (config.num_layers
+                                * config.encoder_hidden_size
+                                * self.encoder.num_directions
                                 + config.context_size
                                 + config.z_conv_size)
-                                
+
         if config.context_input_only:
             context_inference_size += (config.emo_output_size
                                        + config.infersent_output_size)
-            posterior_input_size += (config.emo_output_size 
+            posterior_input_size += (config.emo_output_size
                                      + config.infersent_output_size)
-        
+
         context_encoder_size = context_inference_size + config.z_conv_size
 
         self.context_encoder = layers.ContextRNN(context_encoder_size,
@@ -673,7 +689,7 @@ class VHCR(nn.Module):
         var_posterior = self.softplus(self.sent_posterior_var(h_posterior))
         return mu_posterior, var_posterior
 
-    def forward(self, sentences, sentence_length, input_conversation_length, 
+    def forward(self, sentences, sentence_length, input_conversation_length,
                 target_sentences, decode=False, extra_context_inputs=None,
                 rl_mode=False):
         """
@@ -697,7 +713,7 @@ class VHCR(nn.Module):
         # encoder_hidden: [num_sentences + batch_size, num_layers * direction * hidden_size]
         context_inputs_2d = raw_encoder_hidden.transpose(
             1, 0).contiguous().view(num_sentences + batch_size, -1)
-        
+
         if self.config.context_input_only:
             context_inputs_2d = torch.cat(
                 (context_inputs_2d, extra_context_inputs), 1)
@@ -810,7 +826,7 @@ class VHCR(nn.Module):
         emoji_preds = None
         if self.config.emotion:
             emoji_preds = self.context2emoji(context_outputs)
-        
+
         # Predict sentence embeddings using discriminator.
         infersent_preds = None
         if self.config.infersent:
@@ -835,18 +851,18 @@ class VHCR(nn.Module):
             decoder_outputs = self.decoder(target_sentences,
                                             init_h=decoder_init,
                                             decode=decode)
-            return (decoder_outputs, kl_div, log_p_z, log_q_zx, 
+            return (decoder_outputs, kl_div, log_p_z, log_q_zx,
                     emoji_preds, infersent_preds)
 
         else:
             # prediction: [batch_size, beam_size, max_unroll]
             prediction, final_score, length = self.decoder.beam_decode(
                 init_h=decoder_init)
-            return (prediction, kl_div, log_p_z, log_q_zx, 
+            return (prediction, kl_div, log_p_z, log_q_zx,
                     emoji_preds, infersent_preds)
 
-    def generate(self, context, sentence_length, n_context, 
-                 extra_context_inputs=None, botmoji=None, botsent=None, 
+    def generate(self, context, sentence_length, n_context,
+                 extra_context_inputs=None, botmoji=None, botsent=None,
                  vocab=None):
         # context: [batch_size, n_context, seq_len]
         batch_size = context.size(0)
@@ -873,11 +889,11 @@ class VHCR(nn.Module):
             if self.config.context_input_only:
                 context_inputs_2d = torch.cat(
                     (context_inputs_2d, extra_context_inputs), 1)
-    
+
             context_inputs_list.append(context_inputs_2d)
 
         context_inputs = torch.stack(context_inputs_list, 1)
-        (context_inference_outputs, 
+        (context_inference_outputs,
          context_inference_hidden) = self.context_inference(
              context_inputs, to_var(torch.LongTensor([n_context] * batch_size)))
         context_inference_hidden = context_inference_hidden.transpose(
@@ -957,7 +973,7 @@ class VHCR(nn.Module):
         return samples
 
 
-def dynamically_assess_context_inputs(gen_response, botmoji, botsent, vocab, 
+def dynamically_assess_context_inputs(gen_response, botmoji, botsent, vocab,
                                       config):
     gen_response = gen_response.view(-1,30).cpu().numpy()
 
