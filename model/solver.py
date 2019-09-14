@@ -43,9 +43,11 @@ class Solver(object):
         self.vocab = vocab
         self.is_train = is_train
         self.model = model
-        self.botmoji = Botmoji()
-        self.botsent = Botsent(config.dataset_dir.joinpath('train'), version=1, explained_var=0.95)
         self.detokenizer = Detok()
+
+        if config.emotion or config.infersent or config.context_input_only:
+            self.botmoji = Botmoji()
+            self.botsent = Botsent(config.dataset_dir.joinpath('train'), version=1, explained_var=0.95)
 
         # Info for saving epoch metrics to a csv file
         if self.config.mode == 'train':
@@ -854,9 +856,11 @@ class VariationalSolver(Solver):
         self.vocab = vocab
         self.is_train = is_train
         self.model = model
-        self.botmoji = Botmoji()
-        self.botsent = Botsent(config.dataset_dir.joinpath('train'), version=1, explained_var=0.95)
         self.detokenizer = Detok()
+
+        if config.emotion or config.infersent or config.context_input_only:
+            self.botmoji = Botmoji()
+            self.botsent = Botsent(config.dataset_dir.joinpath('train'), version=1, explained_var=0.95)
 
         # Info for saving epoch metrics to a csv file
         if self.config.mode == 'train':
