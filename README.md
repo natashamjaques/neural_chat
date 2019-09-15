@@ -1,9 +1,9 @@
 # Neural Chat
-[PyTorch 0.4](https://github.com/pytorch/pytorch) Implementation of Neural Chat: [Approximating Interactive Human Evaluation with Self-Play for Open-Domain Dialog Systems](https://arxiv.org/abs/1906.09308). You can interact with the models here: **http://neural.chat**. 
+[PyTorch 0.4](https://github.com/pytorch/pytorch) Implementation of Neural Chat: [Approximating Interactive Human Evaluation with Self-Play for Open-Domain Dialog Systems](https://arxiv.org/abs/1906.09308). You can interact with the models here: **http://neural.chat**.
 
 This repository is accompanied by [Neural Chat Web](https://github.com/asmadotgh/neural_chat_web) to deploy a web server and host the models online.
 
-This code is inspired by and built off of "A Hierarchical Latent Structure for Variational Conversation Modeling" ([code](https://github.com/ctr4si/A-Hierarchical-Latent-Structure-for-Variational-Conversation-Modeling), [paper](https://arxiv.org/abs/1804.03424), [presentation](https://vimeo.com/277671819)). 
+This code is inspired by and built off of "A Hierarchical Latent Structure for Variational Conversation Modeling" ([code](https://github.com/ctr4si/A-Hierarchical-Latent-Structure-for-Variational-Conversation-Modeling), [paper](https://arxiv.org/abs/1804.03424), [presentation](https://vimeo.com/277671819)).
 
 ## Prerequisites
 This section includes installation of required libraries, and downloading pre-trained models.
@@ -18,6 +18,9 @@ Setup python path to include repo
 ```
 python setup.py develop
 ```
+
+### PyTorch Setup
+Follow the instructions [here](https://pytorch.org/get-started/previous-versions/) to download PyTorch version (0.4.0). This version is outdated so you cannot directly run ```pip install torch==0.4.0```.
 
 ### InferSent Setup
 
@@ -98,8 +101,8 @@ Go to the model directory and set the save_dir in configs.py (this is where the 
 By default, it will save a model checkpoint every epoch to <save_dir> and a tensorboard summary.
 For more arguments and options, see config.py.
 
-Note that after training, you should only keep the single optimal checkpoint in the checkpoint directory for 
-[evaluation](#evaluation) and [interaction](#interacting-with-models) steps and remove the 
+Note that after training, you should only keep the single optimal checkpoint in the checkpoint directory for
+[evaluation](#evaluation) and [interaction](#interacting-with-models) steps and remove the
 remaining checkpoints.
 
 We provide our implementation of EI (Emotion+Infersent) models built upon implementations for [VHCR](https://arxiv.org/pdf/1804.03424.pdf), [VHRED](https://arxiv.org/abs/1605.06069), and [HRED](https://arxiv.org/abs/1507.02221).
