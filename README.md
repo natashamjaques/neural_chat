@@ -20,7 +20,10 @@ python setup.py develop
 ```
 
 ### PyTorch Setup
-Follow the instructions [here](https://pytorch.org/get-started/previous-versions/) to download PyTorch version (0.4.0). This version is outdated so you cannot directly run ```pip install torch==0.4.0```.
+Follow the instructions [here](https://pytorch.org/get-started/previous-versions/) to download PyTorch version (0.4.0) or by running
+```bash
+pip install torch===1.2.0 torchvision===0.4.0 -f https://download.pytorch.org/whl/torch_stable.html
+```
 
 ### InferSent Setup
 
