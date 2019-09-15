@@ -2,7 +2,6 @@ import os
 import argparse
 import ast
 from datetime import datetime
-from collections import defaultdict
 from pathlib import Path
 import pprint
 from torch import optim
@@ -16,7 +15,7 @@ optimizer_dict = {'RMSprop': optim.RMSprop, 'Adam': optim.Adam}
 rnn_dict = {'lstm': nn.LSTM, 'gru': nn.GRU}
 rnncell_dict = {'lstm': StackedLSTMCell, 'gru': StackedGRUCell}
 username = Path.home().name
-save_dir = Path(os.path.expanduser('~')+'/neural_chat/model_checkpoints/')
+save_dir = project_dir.joinpath('model_checkpoints')
 
 
 def str2bool(v):
@@ -69,7 +68,7 @@ class Config(object):
         if self.emotion or self.calc_novel_embedding:
             self.emojis_path = self.data_dir.joinpath('sentence_emojis.pkl')
             if 'input_only' not in extra_model_desc: extra_model_desc += "emotion_"
-        
+
         if self.infersent or self.calc_novel_embedding:
             self.infersent_path = self.data_dir.joinpath('sentence_embeddings_1_PCA_0.95.pkl')
             if 'input_only' not in extra_model_desc: extra_model_desc += "infersent_"
@@ -78,7 +77,7 @@ class Config(object):
         if self.mode == 'train' and self.checkpoint is None:
             time_now = datetime.now().strftime('%Y-%m-%d_%H:%M:%S.%f')[:-3]
             self.save_path = save_dir.joinpath(
-                self.data, self.extra_save_dir, extra_model_desc + self.model, 
+                self.data, self.extra_save_dir, extra_model_desc + self.model,
                 time_now)
             self.logdir = self.save_path
             os.makedirs(self.save_path, exist_ok=True)
@@ -224,7 +223,7 @@ def get_config_from_dir(checkpoint_dir, **optional_kwargs):
         latest = sorted(checkpoint_nums)[-1]
         latest_checkpoint = os.path.join(checkpoint_dir, str(latest) + '.pkl')
     print('Found latest checkpoint', latest_checkpoint)
-    
+
     # Transform raw file lines into appropriate dict format
     lines = lines[1:]   # Discard line reading 'Configurations'
     lines = [l for l in lines if 'Posix' not in l]
@@ -252,9 +251,9 @@ def get_config_from_dir(checkpoint_dir, **optional_kwargs):
 
     # Override with checkpoint
     config_dict['checkpoint'] = os.path.join(checkpoint_dir, latest_checkpoint)
-    
+
     # Backwards compatibility with new features
-    new_features = ['context_input_only', 'emo_weight', 'emotion', 
+    new_features = ['context_input_only', 'emo_weight', 'emotion',
                     'infersent', 'infersent_weight', 'load_rl_ckpt']
     for feat in new_features:
         if feat not in config_dict:
