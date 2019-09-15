@@ -21,7 +21,7 @@ If you are interested in the Toxicity reward download the Toxic Comments dataset
 Refer to the top-level README for instructions on training a VHRED model. Once you have a pre-trained checkpoint, you can start fine-tuning your checkpoint using hierarchical reinforcement learning as follows:
 
 ```
-python rl/run_hrl.py --vhrl -r 'reward_bot_deepmoji' 'reward_question' 'reward_repetition' -w 0.3 0.2 0.5 \
+python HierarchicalRL/run_hrl.py --vhrl -r 'reward_bot_deepmoji' 'reward_question' 'reward_repetition' -w 0.3 0.2 0.5 \
     --checkpoint=<path_to_your_checkpoint_directory>
 ```
 
@@ -33,7 +33,20 @@ There are three main training configurations:
 Exactly one of these training modes need to be specified for correct training. The behavior of these configurations is further described in the paper. Refer to the arguments defined in ```run_hrl.py``` for training hyperparameters.  
 
 ### Transformers
-To train the baseline transformer described in the paper refer to the ParlAI documentation [here](https://www.parl.ai/docs/index.html). We added a ```redditcasual``` task that can be used to train the transformer on reddit data.
+> For more information about ParlAI refer to the official documentation [here] (https://www.parl.ai/docs/index.html)
+
+First you need to install ParlAI using:
+```
+python ParlAI/setup.py develop
+```
+
+We added a ```redditcasual``` task to ParlAI that can be used to train the transformer on reddit data. To train a transformer you can run:
+```
+python ParlAI/examples/train_model.py -m transformer/generator -t redditcasual --optimizer adam \
+    --adam-eps 1e-9 --betas 0.9,0.98 -lr 1.0 --lr-scheduler noam --warmup-updates 10000 --display-examples True \
+    -tr 300 --label-truncate 30 -histsz 10 -mf ParlAI/trained/transformer
+```
+Feel free to include other arguments and adjust the transformer hyperparameters when running this training script.
 
 ## Interacting with RL Models
 
