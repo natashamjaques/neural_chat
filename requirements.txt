@@ -1,5 +1,5 @@
 pandas==0.20.3
-numpy==1.14.0
+numpy==1.14.5
 gensim==3.1.0
 spacy==1.9.0
 tqdm==4.15.0
