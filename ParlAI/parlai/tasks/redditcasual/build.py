@@ -33,7 +33,7 @@ def build(opt):
 
     # check if data had been previously built
     if not build_data.built(dpath, version_string=version):
-        project_dir = Path(__file__).resolve().parent.parent
+        project_dir = Path(__file__).resolve().parent.parent.parent.parent.parent
         data_dir = project_dir.joinpath('datasets/reddit_casual/')
 
         for split in ['valid', 'test', 'train']:
