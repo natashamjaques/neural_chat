@@ -12,7 +12,6 @@ import pandas as pd
 import torch
 import torch.optim as optim
 
-from model.configs import get_config_from_dir
 from model.solver import VariationalSolver
 from model.utils import to_var, EOS_ID, TensorboardWriter, convert_old_checkpoint_format, Vocab
 from model.data_loader import get_loader
