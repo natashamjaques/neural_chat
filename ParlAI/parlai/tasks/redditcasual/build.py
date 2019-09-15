@@ -46,7 +46,6 @@ def build(opt):
             save_dir = project_dir.joinpath('ParlAI', 'data', 'redditcasual')
             if not os.path.isdir(save_dir):
                 os.mkdir(save_dir)
-                
             save_path = save_dir.joinpath(f'{split}.txt')
             with open(save_path, 'w', encoding='utf-8') as f:
                 for conv in data:
