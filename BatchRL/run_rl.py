@@ -5,19 +5,19 @@ from way_off_policy_batch_rl import BatchQ
 
 def parse_config_args():
     parser = argparse.ArgumentParser()
-    
+
     # Must provide checkpoint of pre-trained model to load
     parser.add_argument('--checkpoint', type=str, default=None)
-    
+
     # Info about where batch data is located and whether it needs preprocessing
-    parser.add_argument('--experience_path', type=str, default=None, 
+    parser.add_argument('--experience_path', type=str, default=None,
                         help='Path to .csv containing batch data / experience')
     parser.add_argument('--raw_buffer', action='store_true',
                         help='Set to True if processing buffer from raw file'
                              'obtained directly from website')
     parser.set_defaults(raw=False)
 
-    # RL rewards 
+    # RL rewards
     # e.g: python run_rl.py -r 'reward_you' 'reward_what' -rw 2.0 1.5
     parser.add_argument('-r','--rewards', nargs='+',
                         help='<Required> List of reward functions to combine', )
@@ -28,10 +28,10 @@ def parse_config_args():
     parser.add_argument('--num_steps', type=int, default=1000)
     parser.add_argument('--gamma', type=float, default=0.99)
     parser.add_argument('--target_update_rate', type=float, default=0.005)
-    parser.add_argument('--rl_batch_size', type=int, default=32)
+    parser.add_argument('--rl_batch_size', type=int, default=24)
     parser.add_argument('--learning_rate', type=float, default=0.0001)
     parser.add_argument('--q_loss_func', type=str, default="smooth_l1_loss",
-                        help='Name of torch loss function, eg. mse_loss') 
+                        help='Name of torch loss function, eg. mse_loss')
     parser.add_argument('--gradient_clip', type=float, default=1.0)
 
     # KL-control params
@@ -101,7 +101,7 @@ if __name__ == '__main__':
     # Train config
     kwargs_dict['mode'] = 'train'
     config = get_config_from_dir(kwargs_dict['checkpoint'], **kwargs_dict)
-    
+
     # Val config
     kwargs_dict['mode'] = 'valid'
     val_config = get_config_from_dir(kwargs_dict['checkpoint'], **kwargs_dict)
