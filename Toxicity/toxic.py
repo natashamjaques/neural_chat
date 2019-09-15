@@ -67,7 +67,7 @@ class NBLogisticRegression(LogisticRegression, NBTfidfVectorizer):
 
 if __name__ == '__main__':
     # Code from https://www.kaggle.com/jhoward/nb-svm-strong-linear-baseline
-    data = pd.read_csv(r'C:\Users\Abdul\Workspace\Kaggle_Toxic\data\train.csv')
+    data = pd.read_csv('../datasets/Kaggle_Toxic/data/train.csv')
     # data = pd.read_csv(r'/u/a_saleh/projects/dialog-eq/datasets/toxic_comments/train.csv')
     data['toxic'] = data['toxic'] + data['insult'] + data['obscene'] + data['severe_toxic'] + data['identity_hate'] + data['threat']
     data['toxic'][data['toxic'] != 0] = 1
