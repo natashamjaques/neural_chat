@@ -126,7 +126,8 @@ class Solver(object):
             base_checkpoint_dir = str(Path(checkpoint).parent)
             ckpt_file = checkpoint.replace(base_checkpoint_dir, '')
             ckpt_file = ckpt_file.replace('/', '')
-            self.epoch_i = int(ckpt_file[len('q_net'):ckpt_file.find('.')])
+            net = ckpt_file.split('_')[0] + '_net'
+            self.epoch_i = int(ckpt_file[len(net):ckpt_file.find('.')])
         ckpt = torch.load(checkpoint)
 
         # Maintain backwards compatibility of checkpoints
