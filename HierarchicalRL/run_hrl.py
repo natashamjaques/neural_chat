@@ -1,6 +1,6 @@
 import argparse
 from model.configs import get_config_from_dir
-from hier_rl_tune import REINFORCETuner
+from hrl_tune import REINFORCETuner
 
 
 def parse_config_args():
