@@ -26,22 +26,23 @@ Follow the instructions [here](https://pytorch.org/get-started/previous-versions
 
 > For more information about InferSent module, see [here](https://github.com/natashamjaques/neural_chat/tree/master/inferSent).
 
-Download [GloVe](https://nlp.stanford.edu/projects/glove/) [2.18GB] (V1) or [fastText](https://fasttext.cc/docs/en/english-vectors.html) [5.83GB] (V2) vectors. We suggest using GloVe:
+Download [GloVe](https://nlp.stanford.edu/projects/glove/) [2.18GB] (V1) and the pre-trained InferSent models trained with GloVe.
+
 ```bash
 mkdir inferSent/dataset/GloVe
 curl -Lo inferSent/dataset/GloVe/glove.840B.300d.zip http://nlp.stanford.edu/data/glove.840B.300d.zip
 unzip inferSent/dataset/GloVe/glove.840B.300d.zip -d inferSent/dataset/GloVe/
+curl -Lo inferSent/encoder/infersent1.pickle https://affect.media.mit.edu/neural_chat/inferSent/encoder/infersent1.pickle
+```
 
+You can instead download [fastText](https://fasttext.cc/docs/en/english-vectors.html) [5.83GB] (V2) vectors and the corresponding InferSent model. We suggest using GloVe:
+```bach
 mkdir inferSent/dataset/fastText
 curl -Lo inferSent/dataset/fastText/crawl-300d-2M.vec.zip https://dl.fbaipublicfiles.com/fasttext/vectors-english/crawl-300d-2M-subword.zip
 unzip inferSent/dataset/fastText/crawl-300d-2M.vec.zip -d inferSent/dataset/fastText/
-```
-
-Download the pre-trained InferSent models (V1 trained with GloVe, V2 trained with fastText) [154MB each]:
-```bash
-curl -Lo inferSent/encoder/infersent1.pickle https://affect.media.mit.edu/neural_chat/inferSent/encoder/infersent1.pickle
 curl -Lo inferSent/encoder/infersent2.pickle https://affect.media.mit.edu/neural_chat/inferSent/encoder/infersent2.pickle
 ```
+
 Note that infersent1 is trained with GloVe (which have been trained on text preprocessed with the PTB tokenizer) and infersent2 is trained with fastText (which have been trained on text preprocessed with the MOSES tokenizer). The latter also removes the padding of zeros with max-pooling which was inconvenient when embedding sentences outside of their batches.
 
 ### TorchMoji Setup
