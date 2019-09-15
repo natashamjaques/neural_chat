@@ -504,7 +504,11 @@ class Solver(object):
             print("\033[1A\033[K")
 
         if print_history:
-            for s in context_sentences: print(s)
+            user_turn = True
+            for s in context_sentences:
+                name = username if user_turn else model_name
+                print(name + ': ', s)
+                user_turn = not user_turn
 
     def process_raw_text_into_input(self, raw_text_sentences,
                                     max_sentence_length=30,
