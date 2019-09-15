@@ -208,22 +208,6 @@ def get_config_from_dir(checkpoint_dir, **optional_kwargs):
     f = open(os.path.join(checkpoint_dir, 'config.txt'), 'r')
     lines = f.readlines()
 
-    # Find latest checkpoint in directory
-    if 'load_rl_ckpt' in optional_kwargs and optional_kwargs['load_rl_ckpt']:
-        if 'rl_ckpt_epoch' in optional_kwargs and optional_kwargs['rl_ckpt_epoch']:
-            ckpt_num = optional_kwargs['rl_ckpt_epoch']
-        else:
-            checkpoints = [f for f in os.listdir(checkpoint_dir) if '.pkl' in f]
-            checkpoint_nums = [int(f[len('q_net'):f.find('.')]) for f in checkpoints if 'q_net' in f and 'target' not in f]
-            ckpt_num = sorted(checkpoint_nums)[-1]
-        latest_checkpoint = os.path.join(checkpoint_dir, 'q_net' + str(ckpt_num) + '.pkl')
-    else:
-        checkpoints = [f for f in os.listdir(checkpoint_dir) if str.isdigit(f[0])]
-        checkpoint_nums = [int(f[:f.find('.')]) for f in checkpoints]
-        latest = sorted(checkpoint_nums)[-1]
-        latest_checkpoint = os.path.join(checkpoint_dir, str(latest) + '.pkl')
-    print('Found latest checkpoint', latest_checkpoint)
-
     # Transform raw file lines into appropriate dict format
     lines = lines[1:]   # Discard line reading 'Configurations'
     lines = [l for l in lines if 'Posix' not in l]
@@ -249,8 +233,31 @@ def get_config_from_dir(checkpoint_dir, **optional_kwargs):
     # Override with additional config args
     config_dict.update(optional_kwargs)
 
+    # Find latest checkpoint in directory
+    if (('load_rl_ckpt' in optional_kwargs and optional_kwargs['load_rl_ckpt'])
+        or ('load_rl_ckpt' in config_dict and config_dict['load_rl_ckpt'])):
+        checkpoints = [f for f in os.listdir(checkpoint_dir) if '.pkl' in f]
+        if 'rl_ckpt_epoch' in optional_kwargs and optional_kwargs['rl_ckpt_epoch']:
+            ckpt_num = optional_kwargs['rl_ckpt_epoch']
+        else:
+            checkpoint_nums = []
+            for c in checkpoints:
+                if 'target' in c:
+                    continue
+                else:
+                    net = c.split('_')[0] + '_net'
+                    checkpoint_nums.append(int(c[len(net):c.find('.')]))
+            ckpt_num = sorted(checkpoint_nums)[-1]
+        latest_checkpoint = os.path.join(checkpoint_dir, net + str(ckpt_num) + '.pkl')
+    else:
+        checkpoints = [f for f in os.listdir(checkpoint_dir) if str.isdigit(f[0])]
+        checkpoint_nums = [int(f[:f.find('.')]) for f in checkpoints]
+        latest = sorted(checkpoint_nums)[-1]
+        latest_checkpoint = os.path.join(checkpoint_dir, str(latest) + '.pkl')
+    print('Found latest checkpoint', latest_checkpoint)
+
     # Override with checkpoint
-    config_dict['checkpoint'] = os.path.join(checkpoint_dir, latest_checkpoint)
+    config_dict['checkpoint'] = latest_checkpoint
 
     # Backwards compatibility with new features
     new_features = ['context_input_only', 'emo_weight', 'emotion',
