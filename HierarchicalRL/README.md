@@ -11,7 +11,7 @@ See the top-level README for libraries and installation instructions. The reward
 ### Universal Sentence Encoder Setup
 > For more information about the Universal Sentence Encoder, see [here](https://tfhub.dev/google/universal-sentence-encoder-large/3).
 
-If you are interested in the Universal Sentence Encoder (USE) semantic similarity reward run ```./UniversalSentenceEncoder/encoder_setup.py```.
+If you are interested in the Universal Sentence Encoder (USE) semantic similarity reward run ```./UniversalSentenceEncoder/encoder_setup.py``` to download the pre-trained encoder using ```tensorflow-hub```.
 
 ### Toxicity Setup
 If you are interested in the Toxicity reward download the Toxic Comments dataset from [here](https://www.kaggle.com/c/jigsaw-toxic-comment-classification-challenge/data) and extract it to ```./datasets/Kaggle_Toxic/data/```. Then run ```./Toxicity/toxic.py``` to train the model used to assign toxicity rewards.
@@ -32,6 +32,8 @@ There are three main training configurations:
 
 Exactly one of these training modes need to be specified for training. The behavior of these configurations is further described in the paper.  
 
+### Transformers
+To train the baseline transformer described in the paper refer to the ParlAI documentation [here](https://www.parl.ai/docs/index.html). We added a ```redditcasual``` tasks that can be used to train the transformer on reddit data. 
 
 ## Interacting with RL Models
 
