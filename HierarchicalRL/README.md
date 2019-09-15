@@ -30,10 +30,10 @@ There are three main training configurations:
   *  ```decoupled_vhrl``` which alternates between training the manager and the worker
   *  ```--reinforce``` which only applies rewards at the worker level using REINFORCE
 
-Exactly one of these training modes need to be specified for training. The behavior of these configurations is further described in the paper.  
+Exactly one of these training modes need to be specified for correct training. The behavior of these configurations is further described in the paper. Refer to the arguments defined in ```run_hrl.py``` for training hyperparameters.  
 
 ### Transformers
-To train the baseline transformer described in the paper refer to the ParlAI documentation [here](https://www.parl.ai/docs/index.html). We added a ```redditcasual``` tasks that can be used to train the transformer on reddit data. 
+To train the baseline transformer described in the paper refer to the ParlAI documentation [here](https://www.parl.ai/docs/index.html). We added a ```redditcasual``` task that can be used to train the transformer on reddit data.
 
 ## Interacting with RL Models
 

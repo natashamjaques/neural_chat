@@ -19,6 +19,8 @@ def parse_config_args():
 
 
     # Training config
+    parser.add_argument('--rl_mode', type=str, default='train',
+                        help='Set to interact to interact with the bot.')
     parser.add_argument('--reinforce', action='store_true',
                         help='Set to True for only word level flat reinforce RL.')
     parser.add_argument('--vhrl', action='store_true',
