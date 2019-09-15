@@ -6,6 +6,8 @@ model/results
 checkpoints/
 UniversalSentenceEncoder/*
 !UniversalSentenceEncoder/*.py
+Toxicity/*
+!Toxicity/*.py
 !ParlAI/*
 model/results
 /fonts/
