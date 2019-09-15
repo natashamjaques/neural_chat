@@ -75,7 +75,7 @@ class Config(object):
 
         # Save path
         if self.mode == 'train' and self.checkpoint is None:
-            time_now = datetime.now().strftime('%Y-%m-%d_%H:%M:%S.%f')[:-3]
+            time_now = datetime.now().strftime('%Y-%m-%d_%H;%M;%S')
             self.save_path = save_dir.joinpath(
                 self.data, self.extra_save_dir, extra_model_desc + self.model,
                 time_now)
