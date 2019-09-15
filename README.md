@@ -20,9 +20,9 @@ python setup.py develop
 ```
 
 ### PyTorch Setup
-Follow the instructions [here](https://pytorch.org/get-started/previous-versions/) to download PyTorch version (0.4.0) or by running
+Follow the instructions [here](https://pytorch.org/get-started/locally/) to download PyTorch version (0.4.0) or by running
 ```bash
-pip install torch===1.2.0 torchvision===0.4.0 -f https://download.pytorch.org/whl/torch_stable.html
+pip3 install torch===0.4.0 -f https://download.pytorch.org/whl/torch_stable.html
 ```
 
 ### InferSent Setup
@@ -165,12 +165,22 @@ Please refer to [**Neural Chat Web**](https://github.com/asmadotgh/neural_chat_w
 ## Reference
 If you use this code or the released Reddit dataset, please reference one of the following papers:
 
-For reinforcement learning in dialog systems, refer to:
+For batch reinforcement learning in dialog systems, refer to:
 ```
 @article{jaques2019way,
   title={Way Off-Policy Batch Deep Reinforcement Learning of Implicit Human Preferences in Dialog},
   author={Jaques, Natasha and Ghandeharioun, Asma and Shen, Judy and Ferguson, Craig and Jones, Noah, and Lapedriza, Agata and Gu, Shixiang and Picard, Rosalind},
   journal={arXiv preprint arXiv:},
+```
+
+For hierarchical reinforcement learning for open-domain dialog, refer to:
+```
+@article{saleh2019hier,
+  title={Hierarchical Reinforcement Learning for Open-Domain Dialog},
+  author={Saleh, Abdelrhman and Jaques, Natasha and Ghandeharioun, Asma and Shen, Judy and Picard, Rosalind},
+  journal={arXiv preprint arXiv:0000000000},
+  year={2019}
+}
 ```
 
 For interactive evaluation, use of Reddit dataset, miscellaneous use-cases, refer to [the following paper](https://arxiv.org/abs/1906.09308):

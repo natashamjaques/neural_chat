@@ -20,21 +20,21 @@ The raw batch of interaction data is provided as a .csv with columns for the act
 In our case, we use the human responses to extract different reward functions using the file ```rewards.py```. Each reward function is added as a column to the .csv file, and all reward columns start with the prefix 'reward_'. To preprocess and compute rewards, use:
 
 ```
-python rl/rewards.py --raw --experience_path=<path_to_experience_csv_file> --save_path=<save_path>
+python BatchRL/rewards.py --raw --experience_path=<path_to_experience_csv_file> --save_path=<save_path>
 ```
 
 ## Training
 Once you've computed the rewards, you can train the RL model using the processed .csv and your pretrained checkpoint. Be sure to specify which reward columns to use and how much to weight each column, as follows:
 
 ```
-python rl/run_rl.py --checkpoint=<path_to_your_checkpoint_directory> --experience_path=<path_to_processed_csv> \
+python BatchRL/run_rl.py --checkpoint=<path_to_your_checkpoint_directory> --experience_path=<path_to_processed_csv> \
     -r 'reward_deepmoji' 'reward_answer_length_words' -w 0.5 0.5
 ```
 
 The file ```run_rl.py``` shows how to add hyperparameters for KL-control, etc. The best performing model uses KL-control with Psi-learning and monte carlo targets, as follows:
 
 ```
-python rl/run_rl.py --checkpoint=<path_to_your_checkpoint_directory> --experience_path=<path_to_processed_csv> \
+python BatchRL/run_rl.py --checkpoint=<path_to_your_checkpoint_directory> --experience_path=<path_to_processed_csv> \
     -r 'reward_deepmoji' 'reward_answer_length_words' -w 0.5 0.5 \
     --monte_carlo_count=5 --kl_control --kl_weight_c 0.5 --psi_learning
 ```
