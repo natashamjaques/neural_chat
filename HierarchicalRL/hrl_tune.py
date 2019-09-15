@@ -108,8 +108,10 @@ class REINFORCETuner:
             self.step += 1
             self.train_step()
 
-            if self.step % self.config.summary_every_n == 0:
-                self.print_step_summary()
+            if self.step % self.config.print_every_n == 0:
+                self.print_summary()
+
+            if self.step % self.config.log_every_n == 0:
                 self.write_summary(self.step)
 
             if self.step % self.config.save_every_n == 0:
@@ -260,7 +262,7 @@ class REINFORCETuner:
         for r in self.config.rewards:
             self.rewards_history[r] = [0]
 
-    def print_step_summary(self, mode):
+    def print_summary(self, mode):
         print(20 * '*')
         print(20 * '*')
         # print(40 * '*')
