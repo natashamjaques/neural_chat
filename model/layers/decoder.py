@@ -288,7 +288,6 @@ class DecoderRNN(BaseRNNDecoder):
             Return:
                 out   : [batch_size, seq_len]
         """
-        print(inputs)
         batch_size = self.batch_size(inputs, init_h)
 
         # x: [batch_size]

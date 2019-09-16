@@ -441,15 +441,6 @@ class VHRED(nn.Module):
 
         # train: [batch_size, seq_len, vocab_size]
         # eval: [batch_size, seq_len]
-        if rl_mode or not decode:
-            # Batch RL step or MLE pre-training step
-            decoder_outputs = self.decoder(target_sentences,
-                                           init_h=decoder_init,
-                                           decode=decode)
-
-            return (decoder_outputs, kl_div, log_p_z, log_q_zx,
-                    emoji_preds, infersent_preds)
-
         if rl_mode and decode:
             # VHRL or REINFORCE step
             # prediction: [num_sents, max_sent_len]
@@ -462,6 +453,15 @@ class VHRED(nn.Module):
             return (prediction, kl_div, log_p_z, log_q_zx,
                     emoji_preds, infersent_preds, word_probs, log_p_z_sent)
 
+        elif rl_mode or not decode:
+            # Batch RL step or MLE pre-training step
+            decoder_outputs = self.decoder(target_sentences,
+                                           init_h=decoder_init,
+                                           decode=decode)
+
+            return (decoder_outputs, kl_div, log_p_z, log_q_zx,
+                    emoji_preds, infersent_preds)
+    
         else:
             # prediction: [batch_size, beam_size, max_unroll]
             prediction, final_score, length = self.decoder.beam_decode(
