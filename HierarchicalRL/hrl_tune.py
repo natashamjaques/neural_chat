@@ -120,7 +120,7 @@ class REINFORCETuner:
         """RL training step.
         Behavior depends on mode --vhrl | --reinforce | --decoupled_vhrl
         """
-        conversations, manager_actions, worker_actions = self.run_episodes(self.config.episode_len)
+        conversations, manager_actions, worker_actions = self.run_episodes()
         rewards = self.compute_rewards(conversations, self.config.rewards,
                                        self.config.reward_weights,
                                        self.config.gamma)
