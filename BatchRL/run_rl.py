@@ -28,7 +28,7 @@ def parse_config_args():
     parser.add_argument('--num_steps', type=int, default=1000)
     parser.add_argument('--gamma', type=float, default=0.99)
     parser.add_argument('--target_update_rate', type=float, default=0.005)
-    parser.add_argument('--rl_batch_size', type=int, default=24)
+    parser.add_argument('--rl_batch_size', type=int, default=32)
     parser.add_argument('--learning_rate', type=float, default=0.0001)
     parser.add_argument('--q_loss_func', type=str, default="smooth_l1_loss",
                         help='Name of torch loss function, eg. mse_loss')
