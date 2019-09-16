@@ -239,11 +239,7 @@ def reward_bot_deepmoji(conversations):
     episode_len = (len(conversations[0]) - 1) // 2
     # Flattened bot responses
     bot_responses = [resp for conv in conversations for resp in conv[1::2]]
-    for i, conv in enumerate(conversations):
-        if len(conv) != 7:
-            print(i, conv)
-    print(num_convs, episode_len, len(bot_responses))
-
+    
     # Run deepmoji
     reward_multiplier = _get_reward_multiplier()
     bot_emojis = botmoji.encode_multiple(bot_responses)

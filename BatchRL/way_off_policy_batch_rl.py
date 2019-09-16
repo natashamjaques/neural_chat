@@ -512,7 +512,7 @@ class BatchQ:
 
         # Make save path
         self.save_dir = default_save_path.joinpath(
-            self.q_net.config.data, extra_save_dir, experiment_name,
+            self.q_net.config.data, experiment_name, extra_save_dir,
             extra_model_desc + self.q_net.config.model, time_now)
 
         # Make directory and save config
