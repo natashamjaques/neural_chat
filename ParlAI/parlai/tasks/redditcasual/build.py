@@ -10,9 +10,7 @@ from random import sample
 import parlai.core.build_data as build_data
 
 
-def add_interaction(conv):
-    global processed
-    processed = ''
+def add_interaction(conv, processed):
     conv_len = len(conv) if len(conv) % 2 == 0 else len(conv)-1
     if not conv_len: return
     _conv = conv[:conv_len]
@@ -24,6 +22,7 @@ def add_interaction(conv):
     # undo new line
     processed = processed.strip('\n')
     processed += '\tepisode_done:True\n'
+    return processed
 
 
 def build(opt):
@@ -59,13 +58,13 @@ def build(opt):
                     # For example, the conversation x1, y1, x2, y2, x3 becomes:
                     # x1 y1
                     # x2 y2
-                    add_interaction(conv)
+                    processed = add_interaction(conv, processed)
 
                     # Create other perspective.
                     # For example, the conversation x1, y1, x2, y2, x3 becomes:
                     # y1 x2
                     # y2 x3
-                    add_interaction(conv[1:])
+                    processed = add_interaction(conv[1:], processed)
 
                     f.write(processed)
 
