@@ -362,7 +362,7 @@ class REINFORCETuner:
 
     def save_model(self, t):
         """Save parameters to checkpoint"""
-        ckpt_path = os.path.join(self.save_dir, f'policy_net{t}.pkl')
+        ckpt_path = os.path.join(self.config.data, self.save_dir, f'policy_net{t}.pkl')
 
         print('%'*5)
         print('%'*5)
