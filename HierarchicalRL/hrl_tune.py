@@ -172,6 +172,7 @@ class REINFORCETuner:
         """
         # Initialize interactions with sentence from train set
         conversations = random.sample(self.start_sentences, self.config.rl_batch_size)
+        print([len(c) for i, c in enumerate(conversations)])
         manager_actions = []
         worker_actions = []
 
@@ -195,7 +196,6 @@ class REINFORCETuner:
             decoded = [self.policy_net.vocab.decode(resp) for resp in responses]
             print([len(c) for i, c in enumerate(conversations)])
             _ = [conv.append(decoded[i]) for i, conv in enumerate(conversations)]
-            print([len(c) for i, c in enumerate(conversations)])
 
             if not simulated_turn:
                 # Get worker actions
