@@ -262,9 +262,6 @@ class REINFORCETuner:
             self.rewards_history[r] = [0]
 
     def print_summary(self):
-        print(20 * '*')
-        print(20 * '*')
-        # print(40 * '*')
         print(f'Summary at update step {self.step}')
         for r in self.config.rewards:
             print(r + ': ')
