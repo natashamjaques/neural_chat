@@ -34,9 +34,9 @@ class BatchQ:
 
         # Load experience replay buffer from file
         self.experience = replay_buffer.CsvReplayBuffer(
-            config.experience_path, raw=config.raw_buffer, 
+            config.experience_path, raw=config.raw_buffer,
             history_len=config.max_conversation_length, config=config,
-            max_sentence_length=config.max_sentence_length, 
+            max_sentence_length=config.max_sentence_length,
             rewards=config.rewards, reward_weights=config.reward_weights,
             model_averaging=config.model_averaging)
         self.vocab = self.experience.vocab
@@ -52,7 +52,7 @@ class BatchQ:
         # Build internal hierarchical models
         self.eval_data = self.get_data_loader()
         self.build_models()
-        
+
         if self.config.load_rl_ckpt:
             self.load_models()
 
@@ -86,24 +86,24 @@ class BatchQ:
         # Optimize the model
         self.q_optimizer.zero_grad()
         loss.backward()
-        
+
         # Clip gradients - absolutely crucial
-        torch.nn.utils.clip_grad_value_(self.q_net.model.parameters(), 
+        torch.nn.utils.clip_grad_value_(self.q_net.model.parameters(),
                                         self.config.gradient_clip)
 
         self.q_optimizer.step()
 
         # Update Target Networks
-        tau = self.config.target_update_rate 
-        for param, target_param in zip(self.q_net.model.parameters(), 
+        tau = self.config.target_update_rate
+        for param, target_param in zip(self.q_net.model.parameters(),
                                        self.target_q_net.model.parameters()):
             target_param.data.copy_(
                 tau * param.data + (1 - tau) * target_param.data)
 
     def get_q_values(self, batch):
         """update where states are whole conversations which
-        each have several sentences, and actions are a sentence (series of 
-        words). Q values are per word. Target Q values are over the next word 
+        each have several sentences, and actions are a sentence (series of
+        words). Q values are per word. Target Q values are over the next word
         in the sentence, or, if at the end of the sentence, the first word in a
         new sentence after the user response.
         """
@@ -111,10 +111,10 @@ class BatchQ:
 
         # Prepare inputs to Q network
         conversations = [np.concatenate(
-            (conv, np.atleast_2d(batch['action'][i]))) 
+            (conv, np.atleast_2d(batch['action'][i])))
             for i, conv in enumerate(batch['state'])]
         sent_lens = [np.concatenate(
-            (lens, np.atleast_1d(batch['action_lens'][i]))) 
+            (lens, np.atleast_1d(batch['action_lens'][i])))
             for i, lens in enumerate(batch['state_lens'])]
         target_conversations = [conv[1:] for conv in conversations]
         conv_lens = [len(c) - 1 for c in conversations]
@@ -124,29 +124,29 @@ class BatchQ:
         else:
             sent_lens = np.concatenate([l for l in sent_lens])
         conv_lens = to_var(torch.LongTensor(conv_lens))
-        
+
         # Run Q network. Will produce [num_sentences, max sent len, vocab size]
         all_q_values = self.run_seq2seq_model(
-            self.q_net, conversations, sent_lens, target_conversations, 
+            self.q_net, conversations, sent_lens, target_conversations,
             conv_lens)
 
-        # Index to get only q values for actions taken (last sentence in each 
+        # Index to get only q values for actions taken (last sentence in each
         # conversation)
         start_q = torch.cumsum(torch.cat(
             (to_var(conv_lens.data.new(1).zero_()), conv_lens[:-1])), 0)
         conv_q_values = torch.stack(
             [all_q_values[s+l-1, :, :]
-             for s, l in zip(start_q.data.tolist(), conv_lens.data.tolist())], 
+             for s, l in zip(start_q.data.tolist(), conv_lens.data.tolist())],
              0)  # [num_sentences, max_sent_len, vocab_size]
 
         # Limit by actual sentence length (remove padding) and flatten into
         # long list of words
         word_q_values = torch.cat(
-            [conv_q_values[i, :l, :] 
-             for i, l in enumerate(batch['action_lens'])], 
+            [conv_q_values[i, :l, :]
+             for i, l in enumerate(batch['action_lens'])],
              0)  # [total words, vocab_size]
         word_actions = torch.cat(
-            [actions[i, :l] for i, l in enumerate(batch['action_lens'])], 
+            [actions[i, :l] for i, l in enumerate(batch['action_lens'])],
             0)  # [total words]
 
         # Extract q values corresponding to actions taken
@@ -160,24 +160,24 @@ class BatchQ:
         q_dists = torch.nn.functional.softmax(word_q_values, 1)
         q_probs = q_dists.gather(
                 1, word_actions.unsqueeze(1)).squeeze()
-        
+
         with torch.no_grad():
-            # Run pretrained prior network. 
+            # Run pretrained prior network.
             # [num_sentences, max sent len, vocab size]
             all_prior_logits = self.run_seq2seq_model(
-                self.pretrained_prior, conversations, sent_lens, 
+                self.pretrained_prior, conversations, sent_lens,
                 target_conversations, conv_lens)
 
             # Get relevant actions. [num_sentences, max_sent_len, vocab_size]
             conv_prior = torch.stack(
                 [all_prior_logits[s+l-1, :, :]
                 for s, l in zip(
-                    start_q.data.tolist(), conv_lens.data.tolist())], 0)  
-            
+                    start_q.data.tolist(), conv_lens.data.tolist())], 0)
+
             # Limit by actual sentence length (remove padding) and flatten.
             # [total words, vocab_size]
             word_prior_logits = torch.cat(
-                [conv_prior[i, :l, :] 
+                [conv_prior[i, :l, :]
                 for i, l in enumerate(batch['action_lens'])], 0)
 
             # Take the softmax
@@ -197,16 +197,16 @@ class BatchQ:
                 # Convert to tensors and flatten into [num_words]
                 word_model_avg = torch.cat([to_var(
                     torch.FloatTensor(m)) for m in model_avg_sentences], 0)
-                
+
                 # Compute KL from model-averaged prior
                 prior_rewards = word_model_avg.log() - q_probs.log()
 
-                # Clip because KL should never be negative, so because we 
+                # Clip because KL should never be negative, so because we
                 # are subtracting KL, rewards should never be positive
                 prior_rewards = torch.clamp(prior_rewards, max=0.0)
-            
+
             elif self.config.kl_control and self.config.kl_calc == 'integral':
-                # Note: we reward the negative KL divergence to ensure the 
+                # Note: we reward the negative KL divergence to ensure the
                 # RL model stays close to the prior
                 prior_rewards = -1.0 * torch.sum(kl_div, dim=1)
             elif self.config.kl_control:
@@ -230,7 +230,7 @@ class BatchQ:
         self.sampled_reward_batch_history.append(torch.sum(rewards).item())
 
         # Prepare inputs to target Q network. Append a blank sentence to get
-        # best response at next utterance to user input. (Next state 
+        # best response at next utterance to user input. (Next state
         # includes user input).
         blank_sentence = np.zeros((1, self.config.max_sentence_length))
         next_state_convs = [np.concatenate(
@@ -329,7 +329,7 @@ class BatchQ:
         if self.config.kl_control:
             self.kl_reward_history = []
             self.kl_reward_batch_history = []
-        
+
         # Need to track KL metrics even for baselines for plots
         self.kl_div_history = []
         self.kl_div_batch_history = []
@@ -354,9 +354,9 @@ class BatchQ:
                     self.sampled_reward_batch_history) / self.config.log_every_n
                 self.sampled_reward_history.append(self.epoch_sampled_reward)
                 self.sampled_reward_batch_history = []
-                print('\tAverage sampled batch reward =', 
+                print('\tAverage sampled batch reward =',
                     self.epoch_sampled_reward)
-                
+
                 if self.config.kl_control:
                     self.epoch_kl_reward = np.sum(
                         self.kl_reward_batch_history) \
@@ -364,7 +364,7 @@ class BatchQ:
                     self.kl_reward_history.append(
                         self.epoch_kl_reward)
                     self.kl_reward_batch_history = []
-                    print('\tAverage data prior reward =', 
+                    print('\tAverage data prior reward =',
                         self.epoch_kl_reward)
 
                 # Logging KL for plots
@@ -380,7 +380,7 @@ class BatchQ:
                     self.logp_logq_batch_history) / self.config.log_every_n
                 self.logp_logq_history.append(self.epoch_logp_logq)
                 self.logp_logq_batch_history = []
-                
+
                 sys.stdout.flush()
                 self.write_summary(self.t)
 
@@ -392,10 +392,10 @@ class BatchQ:
     def build_models(self):
         config = copy.deepcopy(self.config)
 
-        # If loading RL checkpoint, ensure it doesn't try to load the ckpt 
+        # If loading RL checkpoint, ensure it doesn't try to load the ckpt
         # through Solver
         if self.config.load_rl_ckpt:
-            config.checkpoint = None  
+            config.checkpoint = None
 
         if self.config.model in VariationalModels:
             self.q_net = VariationalSolver(
@@ -415,15 +415,15 @@ class BatchQ:
 
         if self.config.model in VariationalModels:
             self.pretrained_prior = VariationalSolver(
-                self.config, None, self.eval_data, vocab=self.vocab, 
+                self.config, None, self.eval_data, vocab=self.vocab,
                 is_train=True)
         else:
             self.pretrained_prior = Solver(
-                self.config, None, self.eval_data, vocab=self.vocab, 
+                self.config, None, self.eval_data, vocab=self.vocab,
                 is_train=True)
         print('Building prior network')
         self.pretrained_prior.build()
-            
+
         # Freeze the weights of the prior so it stays constant
         self.pretrained_prior.model.eval()
         for params in self.pretrained_prior.model.parameters():
@@ -432,14 +432,14 @@ class BatchQ:
         print('Successfully initialized Q networks')
         self.t = 0
 
-    def run_seq2seq_model(self, q_net, input_conversations, sent_lens, 
+    def run_seq2seq_model(self, q_net, input_conversations, sent_lens,
                      target_conversations, conv_lens):
         # Prepare the batch
         sentences = [sent for conv in input_conversations for sent in conv]
         targets = [sent for conv in target_conversations for sent in conv]
 
-        if not (np.all(np.isfinite(sentences)) 
-                and np.all(np.isfinite(targets)) 
+        if not (np.all(np.isfinite(sentences))
+                and np.all(np.isfinite(targets))
                 and np.all(np.isfinite(sent_lens))):
             print("Input isn't finite")
 
@@ -448,12 +448,12 @@ class BatchQ:
         sent_lens = to_var(torch.LongTensor(sent_lens))
 
         # Run Q network
-        q_outputs = q_net.model(sentences, sent_lens, conv_lens, targets, 
+        q_outputs = q_net.model(sentences, sent_lens, conv_lens, targets,
                                 rl_mode=True)
         return q_outputs[0]  # [num_sentences, max_sentence_len, vocab_size]
 
     def write_summary(self, t):
-        metrics_to_log = ['epoch_q_loss', 'epoch_sampled_reward', 
+        metrics_to_log = ['epoch_q_loss', 'epoch_sampled_reward',
                           'epoch_kl_div', 'epoch_logp', 'epoch_logp_logq']
 
         if self.config.kl_control:
@@ -476,8 +476,7 @@ class BatchQ:
     def set_up_logging(self):
         # Get save path
         time_now = datetime.now().strftime('%Y-%m-%d_%H:%M:%S')
-        default_save_path = Path(
-                os.path.expanduser('~') + '/dialog/model_checkpoints/rl/')
+        default_save_path = Path('../model_checkpoints/rl/')
 
         # Folder for type of RL used
         experiment_name = self.config.experiment_name
@@ -485,11 +484,11 @@ class BatchQ:
             # if self.config.double_q: experiment_name = 'double_q'
             if self.config.model_averaging:
                 experiment_name = 'model_averaging'
-            elif self.config.kl_control: 
+            elif self.config.kl_control:
                 experiment_name = 'kl_control'
                 if self.config.kl_calc == 'sample': experiment_name += '_sample'
             else: experiment_name = 'batch_q'
-            if self.config.psi_learning: 
+            if self.config.psi_learning:
                 experiment_name += '/psi_learning'
             if self.config.monte_carlo_count > 1:
                 experiment_name = 'monte_carlo_targets/' + experiment_name
@@ -506,9 +505,9 @@ class BatchQ:
         extra_model_desc = ""
         if self.config.context_input_only:
             extra_model_desc = 'input_only_'
-        if self.config.emotion and 'input_only' not in extra_model_desc: 
+        if self.config.emotion and 'input_only' not in extra_model_desc:
             extra_model_desc += "emotion_"
-        if self.config.infersent and 'input_only' not in extra_model_desc: 
+        if self.config.infersent and 'input_only' not in extra_model_desc:
             extra_model_desc += "infersent_"
 
         # Make save path
@@ -521,7 +520,7 @@ class BatchQ:
         os.makedirs(self.save_dir, exist_ok=True)
         with open(os.path.join(self.save_dir, 'config.txt'), 'w') as f:
             print(self.config, file=f)
-        
+
         # Make loggers
         self.writer = TensorboardWriter(self.save_dir)
         self.pandas_path = os.path.join(self.save_dir, "metrics.csv")
@@ -600,8 +599,8 @@ class BatchQ:
     def interact(self):
         print("Commencing interaction with bot trained with RL")
         self.q_net.interact(
-                max_sentence_length=self.config.max_sentence_length, 
-                max_conversation_length=self.config.max_conversation_length, 
+                max_sentence_length=self.config.max_sentence_length,
+                max_conversation_length=self.config.max_conversation_length,
                 sample_by='priority', debug=True, print_history=True)
 
 
