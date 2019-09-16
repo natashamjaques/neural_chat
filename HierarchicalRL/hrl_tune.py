@@ -152,8 +152,8 @@ class REINFORCETuner:
 
         # We do not distinguish between manager and worker level rewards
         # but this could be added by calculating two different sets of rewards
-        loss = -1 * (alpha * manager_actions
-                     + beta * worker_actions) * rewards
+        loss = (-1 * (alpha * manager_actions
+                     + beta * worker_actions) * rewards).mean()
 
         optimizer.zero_grad()
         loss.backward()
