@@ -184,7 +184,6 @@ class REINFORCETuner:
             conversation_length = batch[2]
 
             net = self.simulator_net if simulated_turn else self.policy_net
-            print(sentences)
             output = net.model(sentences, sentence_length,
                                conversation_length, [],
                                rl_mode=True, decode=True)
