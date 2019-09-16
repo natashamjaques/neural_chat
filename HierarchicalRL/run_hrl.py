@@ -94,7 +94,7 @@ if __name__ == '__main__':
     tuner = REINFORCETuner(config, val_config)
 
     if config.rl_mode == 'train':
-        tuner.reinforce_learn()
+        tuner.train()
     elif config.rl_mode == 'interact':
         tuner.interact()
     else:
