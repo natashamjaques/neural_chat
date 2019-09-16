@@ -178,6 +178,7 @@ class REINFORCETuner:
         simulated_turn = False
         # episode_len actions implies 2 * episode_len + 1 turns
         for turn in range(2 * self.config.episode_len):
+            print(self.config.episode_len)
             batch = self.policy_net.batchify(conversations)
             sentences = batch[0]
             sentence_length = batch[1]
