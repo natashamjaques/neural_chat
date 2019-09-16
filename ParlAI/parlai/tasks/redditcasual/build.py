@@ -68,7 +68,7 @@ def build(opt):
 
                     try:
                         f.write(processed)
-                    except TypeError:
+                    except:
                         continue
 
     # mark the data as built
