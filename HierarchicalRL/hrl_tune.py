@@ -171,11 +171,7 @@ class REINFORCETuner:
         the output corresponding to that sentence.
         """
         # Initialize interactions with sentence from train set
-        conversations = random.sample(self.start_sentences, self.config.rl_batch_size)
-        print([len(c) for i, c in enumerate(conversations)])
-        for i,c in enumerate(conversations):
-            if len(c) != 1:
-                print(i, c)
+        conversations = deepcopy(random.sample(self.start_sentences, self.config.rl_batch_size))
         manager_actions = []
         worker_actions = []
 
