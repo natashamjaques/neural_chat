@@ -134,16 +134,16 @@ class REINFORCETuner:
 
         if self.config.vhrl or self.config.reinforce:
             optimizer = self.optimizers['worker_manager']
-            alpha, beta = self.alpha, self.beta
+            alpha, beta = self.config.alpha, self.config.beta
 
         elif self.config.decoupled_vhrl:
             # Update manager on even steps, update worker on odd steps
             if self.step % 2 == 0:
                 update_turn = 'manager'
-                alpha, beta = self.alpha, 0
+                alpha, beta = self.config.alpha, 0
             else:
                 update_turn = 'worker'
-                alpha, beta = 0, self.beta
+                alpha, beta = 0, self.config.beta
 
             # Reset optimizer moving averages as model parametrs changed
             # by different optimizer in previous step
