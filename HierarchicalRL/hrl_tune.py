@@ -133,7 +133,7 @@ class REINFORCETuner:
         self.recent_dialog = conversations[0]
 
         if self.config.vhrl or self.config.reinforce:
-            optimizer = self.optimizers['manager_worker']
+            optimizer = self.optimizers['worker_manager']
             alpha, beta = self.alpha, self.beta
 
         elif self.config.decoupled_vhrl:
