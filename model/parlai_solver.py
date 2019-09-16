@@ -5,7 +5,7 @@ from torchMoji.examples.botmoji import Botmoji
 
 
 class ParlAISolver:
-    """Class for integrating ParlAI transformers into the neural_chat_web platform
+    """Dummy class for interacting through transformers with ParlAI
     """
     def __init__(self, config):
         self.botmoji = Botmoji()
