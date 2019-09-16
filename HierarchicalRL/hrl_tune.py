@@ -192,6 +192,7 @@ class REINFORCETuner:
             start_idx = np.cumsum([0] + conversation_length.tolist()[:-1])
             responses = [output[0][s+l-1, 0].tolist()
                          for s, l in zip(start_idx, conversation_length.tolist())]
+            print(responses)
             decoded = [self.policy_net.vocab.decode(resp) for resp in responses]
             _ = [conv.append(decoded[i]) for i, conv in enumerate(conversations)]
 
