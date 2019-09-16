@@ -28,6 +28,8 @@ def add_interaction(conv):
 def build(opt):
     # get path to data directory
     dpath = os.path.join(opt['datapath'], 'redditcasual')
+    print(100 * '*')
+    print(dpath)
     # define version if any
     version = None
 
@@ -43,10 +45,10 @@ def build(opt):
             if split in {'valid', 'test'}:
                 data = sample(data, 2000)
 
-            save_dir = project_dir.joinpath('ParlAI', 'data', 'redditcasual')
-            if not os.path.isdir(save_dir):
-                save_dir.make_dir()
-            save_path = save_dir.joinpath(f'{split}.txt')
+            # save_dir = project_dir.joinpath('ParlAI', 'data', 'redditcasual')
+            if not os.path.isdir(dpath):
+                build_data.make_dir(dpath)
+            save_path = Path(dpath).joinpath(f'{split}.txt')
             with open(save_path, 'w', encoding='utf-8') as f:
                 for conv in data:
                     processed = ''
