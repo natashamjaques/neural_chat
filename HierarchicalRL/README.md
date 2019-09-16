@@ -18,7 +18,7 @@ If you are interested in the Toxicity reward download the Toxic Comments dataset
 
 
 ## Training
-Refer to the top-level README for instructions on training a VHRED model. Once you have a pre-trained checkpoint, you can start fine-tuning your checkpoint using hierarchical reinforcement learning as follows:
+Refer to the top-level README for instructions on training a VHRED model. Make sure the arguments ```--emotion```, ```--infersent```, and the ```--calc_novel_embedding``` are all set to False. Once you have a pre-trained checkpoint, you can start fine-tuning your checkpoint using hierarchical reinforcement learning as follows:
 
 ```
 python HierarchicalRL/run_hrl.py --vhrl -r 'reward_bot_deepmoji' 'reward_question' 'reward_repetition' -w 0.3 0.2 0.5 \
