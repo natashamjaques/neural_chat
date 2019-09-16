@@ -190,10 +190,10 @@ class REINFORCETuner:
 
             # Index corresponding to the start of each conversation
             start_idx = np.cumsum([0] + conversation_length.tolist()[:-1])
-            responses = [output[0][s+l-1].tolist()
+            responses = [output[0][s+l-1, ].tolist()
                          for s, l in zip(start_idx, conversation_length.tolist())]
             decoded = [self.policy_net.vocab.decode(resp) for resp in responses]
-            print([len(decoded[i]) for i, c in enumerate(conversations)])
+            print([len(c) for i, c in enumerate(conversations)])
             _ = [conv.append(decoded[i]) for i, conv in enumerate(conversations)]
 
             if not simulated_turn:
