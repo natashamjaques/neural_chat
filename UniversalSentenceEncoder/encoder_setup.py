@@ -1,6 +1,7 @@
 """Script for downloading Universal Sentence Encoder used for calculating
 Semantic Similarity Reward"""
 import os
+import shutil
 from pathlib import Path
 
 import tensorflow as tf
@@ -25,6 +26,10 @@ with tf.Session() as sess:
     embs = sess.run(embeddings)
     assert(embs.shape == (2, 512))
 
+# Move encoder out of temporary directory into USE directory
+temp_dir = [dir for dir in os.listdir(str(USE_dir)) if os.path.isdir(dir)][0]
+for f in os.listdir(temp_dir):
+    shutil.move(temp_dir+f, str(USE_dir))
 
 print('#' * 10)
 print('#' * 10)
