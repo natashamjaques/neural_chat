@@ -14,7 +14,7 @@ import tensorflow_hub as hub
 
 from model.utils import embedding_metric, Tokenizer, detokenize
 from torchMoji.api.botmoji import Botmoji
-from inferSent.api import Botsent
+from inferSent.api.botsent import Botsent
 from Toxicity.toxic import NBLogisticRegression, NBTfidfVectorizer, tokenize
 
 
