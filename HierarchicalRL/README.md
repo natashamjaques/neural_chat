@@ -30,7 +30,9 @@ There are three main training configurations:
   *  ```decoupled_vhrl``` which alternates between training the manager and the worker
   *  ```--reinforce``` which only applies rewards at the worker level using REINFORCE
 
-Exactly one of these training modes need to be specified for correct training. The behavior of these configurations is further described in the paper. Refer to the arguments defined in ```run_hrl.py``` for training hyperparameters.  
+Exactly one of these training modes need to be specified for correct training. The behavior of these configurations is further described in the paper. Refer to the arguments defined in ```run_hrl.py``` for training hyperparameters.
+
+**Note**: If you get a tensorboard error at this stage run ```pip uninstall tensorboard```  
 
 ### Transformers
 > For more information about ParlAI refer to the official documentation [here] (https://www.parl.ai/docs/index.html)
