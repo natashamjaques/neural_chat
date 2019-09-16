@@ -152,9 +152,6 @@ class REINFORCETuner:
 
         # We do not distinguish between manager and worker level rewards
         # but this could be added by calculating two different sets of rewards
-        print(manager_actions.shape)
-        print(worker_actions.shape)
-        print(rewards.shape)
         loss = (-1 * (alpha * manager_actions
                      + beta * worker_actions) * rewards).mean()
 
