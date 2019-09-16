@@ -194,7 +194,6 @@ class REINFORCETuner:
             responses = [output[0][s+l-1].tolist()
                          for s, l in zip(start_idx, conversation_length.tolist())]
             decoded = [self.policy_net.vocab.decode(resp) for resp in responses]
-            print([len(c) for i, c in enumerate(conversations)])
             _ = [conv.append(decoded[i]) for i, conv in enumerate(conversations)]
 
             if not simulated_turn:
@@ -428,6 +427,8 @@ class REINFORCETuner:
         conversations = pickle.load(open(sent_dir, 'rb'))
         sentences = [[conv[0]] for conv in conversations
                      if len(conv[0].split()) > 5 and len(conv[0].split()) < 20]
+        for s in sentences:
+            assert(len(s) == 1)
         return sentences
 
     def interact(self):
