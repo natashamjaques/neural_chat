@@ -325,15 +325,14 @@ class REINFORCETuner:
         # Get save path
         time_now = datetime.now().strftime('%Y-%m-%d_%H;%M;%S')
         default_save_path = Path('model_checkpoints/rl/')
-        rl_algorithm = 'reinforce'
 
         # Folder for type of RL used
         if self.config.reinforce:
-            rl_hierarchy = 'reinforce'
+            rl_algorithm = 'reinforce'
         elif self.config.vhrl:
-            rl_hierarchy = 'vhrl'
+            rl_algorithm = 'vhrl'
         elif self.config.decoupled_vhrl:
-            rl_hierarchy = 'decoupled_vhrl'
+            rl_algorithm = 'decoupled_vhrl'
 
         # Folder for type of rewards used
         extra_save_dir = self.config.extra_save_dir
@@ -346,8 +345,7 @@ class REINFORCETuner:
 
         # Make save path
         self.save_dir = default_save_path.joinpath(
-            rl_algorithm, rl_hierarchy, self.policy_net.config.data,
-            extra_save_dir, self.policy_net.config.model, time_now)
+            self.config.data, rl_algorithm, extra_save_dir, self.policy_net.config.model, time_now)
 
         # Make directory and save config
         print("Saving output to", self.save_dir)
@@ -362,7 +360,7 @@ class REINFORCETuner:
 
     def save_model(self, t):
         """Save parameters to checkpoint"""
-        ckpt_path = os.path.join(self.config.data, self.save_dir, f'policy_net{t}.pkl')
+        ckpt_path = os.path.join(self.save_dir, f'policy_net{t}.pkl')
 
         print('%'*5)
         print('%'*5)
