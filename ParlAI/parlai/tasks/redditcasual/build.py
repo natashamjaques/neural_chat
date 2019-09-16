@@ -39,6 +39,8 @@ def build(opt):
         for split in ['valid', 'test', 'train']:
             path = data_dir.joinpath(split, 'raw_sentences.pkl')
             data = pickle.load(open(path, 'rb'))
+            print(path)
+            print(data)
 
             if split in {'valid', 'test'}:
                 data = sample(data, 2000)
@@ -49,7 +51,6 @@ def build(opt):
             save_path = Path(dpath).joinpath(f'{split}.txt')
             with open(save_path, 'w', encoding='utf-8') as f:
                 for conv in data:
-                    print(conv)
                     processed = ''
 
                     # clean
