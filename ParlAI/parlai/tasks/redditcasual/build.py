@@ -12,6 +12,7 @@ import parlai.core.build_data as build_data
 
 def add_interaction(conv):
     global processed
+    processed = ''
     conv_len = len(conv) if len(conv) % 2 == 0 else len(conv)-1
     if not conv_len: return
     _conv = conv[:conv_len]
@@ -28,8 +29,6 @@ def add_interaction(conv):
 def build(opt):
     # get path to data directory
     dpath = os.path.join(opt['datapath'], 'redditcasual')
-    print(100 * '*')
-    print(dpath)
     # define version if any
     version = None
 
@@ -45,9 +44,9 @@ def build(opt):
             if split in {'valid', 'test'}:
                 data = sample(data, 2000)
 
-            # save_dir = project_dir.joinpath('ParlAI', 'data', 'redditcasual')
             if not os.path.isdir(dpath):
                 build_data.make_dir(dpath)
+
             save_path = Path(dpath).joinpath(f'{split}.txt')
             with open(save_path, 'w', encoding='utf-8') as f:
                 for conv in data:
