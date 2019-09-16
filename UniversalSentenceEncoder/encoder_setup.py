@@ -10,7 +10,7 @@ import tensorflow_hub as hub
 
 # Set up download dir
 project_dir = Path(__file__).resolve().parent.parent
-USE_dir = project_dir.joinpath('UniversalSentenceEncoder')
+USE_dir = project_dir.joinpath('UniversalSentenceEncoder/')
 os.environ["TFHUB_CACHE_DIR"] = str(USE_dir)
 
 # Download encoder
