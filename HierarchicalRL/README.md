@@ -46,7 +46,7 @@ python ParlAI/examples/train_model.py -m transformer/generator -t redditcasual -
     --adam-eps 1e-9 --betas 0.9,0.98 -lr 1.0 --lr-scheduler noam --warmup-updates 10000 --display-examples True \
     -tr 300 --label-truncate 30 -histsz 10 -mf ParlAI/trained/transformer
 ```
-Feel free to include other arguments and adjust the transformer hyperparameters when running this training script.
+Feel free to include other arguments and adjust the transformer hyperparameters when running this training script. However, note that you will need to install a more recent PyTorch version to use ParlAI as the version used by this repo (0.4.0) isn't supported.
 
 ## Interacting with RL Models
 
