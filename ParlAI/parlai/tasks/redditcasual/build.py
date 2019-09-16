@@ -66,7 +66,10 @@ def build(opt):
                     # y2 x3
                     processed = add_interaction(conv[1:], processed)
 
-                    f.write(processed)
+                    try:
+                        f.write(processed)
+                    except TypeError:
+                        continue
 
     # mark the data as built
     build_data.mark_done(dpath, version_string=version)
