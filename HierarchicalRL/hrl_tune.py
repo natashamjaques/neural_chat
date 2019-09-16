@@ -261,7 +261,7 @@ class REINFORCETuner:
         for r in self.config.rewards:
             self.rewards_history[r] = [0]
 
-    def print_summary(self, mode):
+    def print_summary(self):
         print(20 * '*')
         print(20 * '*')
         # print(40 * '*')
