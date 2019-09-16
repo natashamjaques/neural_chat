@@ -87,8 +87,8 @@ class EncoderRNN(BaseRNNEncoder):
                         batch_first=batch_first,
                         dropout=dropout,
                         bidirectional=bidirectional)
-
         self.rnn.flatten_parameters()
+        
     def forward(self, inputs, input_length, hidden=None):
         """
         Args:

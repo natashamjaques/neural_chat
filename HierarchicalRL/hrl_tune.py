@@ -177,7 +177,6 @@ class REINFORCETuner:
 
         simulated_turn = False
         # episode_len actions implies 2 * episode_len + 1 turns
-        print(self.config.episode_len)
         for turn in range(2 * self.config.episode_len):
             batch = self.policy_net.batchify(conversations)
             sentences = batch[0]
@@ -194,6 +193,7 @@ class REINFORCETuner:
             responses = [output[0][s+l-1].tolist()
                          for s, l in zip(start_idx, conversation_length.tolist())]
             decoded = [self.policy_net.vocab.decode(resp) for resp in responses]
+            print([len(decoded[i]) for i, c in enumerate(conversations)])
             _ = [conv.append(decoded[i]) for i, conv in enumerate(conversations)]
 
             if not simulated_turn:
