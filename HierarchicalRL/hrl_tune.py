@@ -116,7 +116,7 @@ class REINFORCETuner:
             if self.step % self.config.save_every_n == 0:
                 self.save_model(self.step)
 
-    def train_step(self, update_turn):
+    def train_step(self):
         """RL training step.
         Behavior depends on mode --vhrl | --reinforce | --decoupled_vhrl
         """
@@ -171,7 +171,7 @@ class REINFORCETuner:
         the output corresponding to that sentence.
         """
         # Initialize interactions with sentence from train set
-        conversations = random.sample(self.start_sentences, config.rl_batch_size)
+        conversations = random.sample(self.start_sentences, self.config.rl_batch_size)
         manager_actions = []
         worker_actions = []
 
