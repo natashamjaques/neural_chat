@@ -173,6 +173,9 @@ class REINFORCETuner:
         # Initialize interactions with sentence from train set
         conversations = random.sample(self.start_sentences, self.config.rl_batch_size)
         print([len(c) for i, c in enumerate(conversations)])
+        for i,c in enumerate(conversations):
+            if len(c) != 1:
+                print(i, c)
         manager_actions = []
         worker_actions = []
 
@@ -427,8 +430,6 @@ class REINFORCETuner:
         conversations = pickle.load(open(sent_dir, 'rb'))
         sentences = [[conv[0]] for conv in conversations
                      if len(conv[0].split()) > 5 and len(conv[0].split()) < 20]
-        for s in sentences:
-            assert(len(s) == 1)
         return sentences
 
     def interact(self):
