@@ -324,7 +324,7 @@ class REINFORCETuner:
     def set_up_logging(self):
         # Get save path
         time_now = datetime.now().strftime('%Y-%m-%d_%H;%M;%S')
-        default_save_path = Path('../model_checkpoints/rl/')
+        default_save_path = Path('model_checkpoints/rl/')
         rl_algorithm = 'reinforce'
 
         # Folder for type of RL used
