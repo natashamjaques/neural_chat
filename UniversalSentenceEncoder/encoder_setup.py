@@ -10,7 +10,7 @@ import tensorflow_hub as hub
 
 # Set up download dir
 project_dir = Path(__file__).resolve().parent.parent
-USE_dir = project_dir.joinpath('UniversalSentenceEncoder/')
+USE_dir = project_dir.joinpath('UniversalSentenceEncoder')
 os.environ["TFHUB_CACHE_DIR"] = str(USE_dir)
 
 # Download encoder
@@ -27,10 +27,9 @@ with tf.Session() as sess:
     assert(embs.shape == (2, 512))
 
 # Move encoder out of temporary directory into USE directory
-print(os.listdir(USE_dir))
-temp_dir = [dir for dir in os.listdir(USE_dir) if os.path.isdir(dir)][0]
+temp_dir = [USE_dir.joinpath(dir) for dir in os.listdir(USE_dir) if os.path.isdir(USE_dir.joinpath(dir))][0]
 for f in os.listdir(temp_dir):
-    shutil.move(temp_dir+f, str(USE_dir))
+    shutil.move(str(temp_dir.joinpath(f)), USE_dir)
 
 print('#' * 10)
 print('#' * 10)
