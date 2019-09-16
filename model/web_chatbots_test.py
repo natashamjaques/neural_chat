@@ -27,7 +27,7 @@ def interact_with_bot(chatbot, username):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument('--models_base_path', type=str, 
+    parser.add_argument('--models_base_path', type=str,
                         default='/home/dialog/checkpoints/',
                         help='Base path to checkpoints for model averaging.')
     parser.add_argument('--test_chatbots', action='store_true',
@@ -61,4 +61,3 @@ if __name__ == "__main__":
             break
 
         chatbotid = None
-    
