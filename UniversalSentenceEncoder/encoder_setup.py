@@ -27,7 +27,8 @@ with tf.Session() as sess:
     assert(embs.shape == (2, 512))
 
 # Move encoder out of temporary directory into USE directory
-temp_dir = [dir for dir in os.listdir(str(USE_dir)) if os.path.isdir(dir)][0]
+print(os.listdir(USE_dir))
+temp_dir = [dir for dir in os.listdir(USE_dir) if os.path.isdir(dir)][0]
 for f in os.listdir(temp_dir):
     shutil.move(temp_dir+f, str(USE_dir))
 
