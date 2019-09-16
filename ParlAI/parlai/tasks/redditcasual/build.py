@@ -65,7 +65,7 @@ def build(opt):
                     # y1 x2
                     # y2 x3
                     processed = add_interaction(conv[1:], processed)
-
+                    print(processed)
                     f.write(processed)
 
     # mark the data as built
