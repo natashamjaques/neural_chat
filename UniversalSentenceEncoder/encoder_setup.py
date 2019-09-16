@@ -8,7 +8,7 @@ import tensorflow_hub as hub
 
 
 # Set up download dir
-os.environ["TFHUB_CACHE_DIR"] = Path('UniversalSentenceEncoder/')
+os.environ["TFHUB_CACHE_DIR"] = 'UniversalSentenceEncoder/'
 
 # Download encoder
 encoder = hub.Module("https://tfhub.dev/google/universal-sentence-encoder-large/3")
