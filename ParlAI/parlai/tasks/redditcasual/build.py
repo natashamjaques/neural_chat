@@ -49,6 +49,7 @@ def build(opt):
             save_path = Path(dpath).joinpath(f'{split}.txt')
             with open(save_path, 'w', encoding='utf-8') as f:
                 for conv in data:
+                    print(conv)
                     processed = ''
 
                     # clean
@@ -65,7 +66,7 @@ def build(opt):
                     # y1 x2
                     # y2 x3
                     processed = add_interaction(conv[1:], processed)
-                    print(processed)
+
                     f.write(processed)
 
     # mark the data as built
