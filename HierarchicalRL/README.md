@@ -1,6 +1,6 @@
 # Hierarchical Reinforcement Learning for Open-Domain Dialog
 
-This code supports training conversational dialog models using hierarchical reinforcement learning, as described in this [paper](https://arxiv.org/abs/0000000000). The main file is ```hrl_tune.py```, which is invoked using ```run_hrl.py```. The training code initializes a fixed user simulator network and a policy network from a pre-trained [VHRED](https://arxiv.org/abs/1605.06069) model checkpoint. The policy network interacts with the simulator to collect experience and learns to optimize for human-centered rewards through hierarchical reinforcement learning. The hierarchical nature of the framework we propose facilitates learning conversation-level rewards and achieves higher quality ratings according to human evaluators.   
+This code supports training conversational dialog models using hierarchical reinforcement learning, as described in this [paper](https://arxiv.org/abs/1909.07547). The main file is ```hrl_tune.py```, which is invoked using ```run_hrl.py```. The training code initializes a fixed user simulator network and a policy network from a pre-trained [VHRED](https://arxiv.org/abs/1605.06069) model checkpoint. The policy network interacts with the simulator to collect experience and learns to optimize for human-centered rewards through hierarchical reinforcement learning. The hierarchical nature of the framework we propose facilitates learning conversation-level rewards and achieves higher quality ratings according to human evaluators.   
 
 Interaction data was collected using http://neural.chat. To deploy your own model on the web, please see the related repo https://github.com/asmadotgh/neural_chat_web.
 
@@ -63,7 +63,7 @@ If you use this code, please cite our work:
 @article{saleh2019hier,
   title={Hierarchical Reinforcement Learning for Open-Domain Dialog},
   author={Saleh, Abdelrhman and Jaques, Natasha and Ghandeharioun, Asma and Shen, Judy and Picard, Rosalind},
-  journal={arXiv preprint arXiv:0000000000},
+  journal={arXiv preprint arXiv:1909.07547},
   year={2019}
 }
 ```

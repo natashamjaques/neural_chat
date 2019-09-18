@@ -1,7 +1,7 @@
 import os
 from parlai.scripts.interactive import setup_args
 from parlai.core.agents import create_agent
-from torchMoji.examples.botmoji import Botmoji
+from torchMoji.api.botmoji import Botmoji
 
 
 class ParlAISolver:

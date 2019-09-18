@@ -178,7 +178,7 @@ For hierarchical reinforcement learning for open-domain dialog, refer to:
 @article{saleh2019hier,
   title={Hierarchical Reinforcement Learning for Open-Domain Dialog},
   author={Saleh, Abdelrhman and Jaques, Natasha and Ghandeharioun, Asma and Shen, Judy and Picard, Rosalind},
-  journal={arXiv preprint arXiv:0000000000},
+  journal={arXiv preprint arXiv:1909.07547},
   year={2019}
 }
 ```

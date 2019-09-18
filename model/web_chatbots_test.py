@@ -1,6 +1,7 @@
 import argparse
 import os
 
+
 def interact_with_bot(chatbot, username):
     print("\nPlease enjoy your chat with {0}! Type 'exit' or 'quit' to end the chat at any point.\n".format(chatbot.name))
     messages = []
