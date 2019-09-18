@@ -1,9 +1,9 @@
 # Neural Chat
-[PyTorch 0.4](https://github.com/pytorch/pytorch) Implementation of Neural Chat: [Approximating Interactive Human Evaluation with Self-Play for Open-Domain Dialog Systems](https://arxiv.org/abs/1906.09308). You can interact with the models here: **http://neural.chat**. 
+[PyTorch 0.4](https://github.com/pytorch/pytorch) Implementation of Neural Chat: [Approximating Interactive Human Evaluation with Self-Play for Open-Domain Dialog Systems](https://arxiv.org/abs/1906.09308). You can interact with the models here: **http://neural.chat**.
 
 This repository is accompanied by [Neural Chat Web](https://github.com/asmadotgh/neural_chat_web) to deploy a web server and host the models online.
 
-This code is inspired by and built off of "A Hierarchical Latent Structure for Variational Conversation Modeling" ([code](https://github.com/ctr4si/A-Hierarchical-Latent-Structure-for-Variational-Conversation-Modeling), [paper](https://arxiv.org/abs/1804.03424), [presentation](https://vimeo.com/277671819)). 
+This code is inspired by and built off of "A Hierarchical Latent Structure for Variational Conversation Modeling" ([code](https://github.com/ctr4si/A-Hierarchical-Latent-Structure-for-Variational-Conversation-Modeling), [paper](https://arxiv.org/abs/1804.03424), [presentation](https://vimeo.com/277671819)).
 
 ## Prerequisites
 This section includes installation of required libraries, and downloading pre-trained models.
@@ -19,26 +19,33 @@ Setup python path to include repo
 python setup.py develop
 ```
 
+### PyTorch Setup
+Follow the instructions [here](https://pytorch.org/get-started/locally/) to download PyTorch version (0.4.0) or by running
+```bash
+pip3 install torch===0.4.0 -f https://download.pytorch.org/whl/torch_stable.html
+```
+
 ### InferSent Setup
 
 > For more information about InferSent module, see [here](https://github.com/natashamjaques/neural_chat/tree/master/inferSent).
 
-Download [GloVe](https://nlp.stanford.edu/projects/glove/) [2.18GB] (V1) or [fastText](https://fasttext.cc/docs/en/english-vectors.html) [5.83GB] (V2) vectors. We suggest using GloVe:
+Download [GloVe](https://nlp.stanford.edu/projects/glove/) [2.18GB] (V1) and the pre-trained InferSent models trained with GloVe.
+
 ```bash
 mkdir inferSent/dataset/GloVe
 curl -Lo inferSent/dataset/GloVe/glove.840B.300d.zip http://nlp.stanford.edu/data/glove.840B.300d.zip
 unzip inferSent/dataset/GloVe/glove.840B.300d.zip -d inferSent/dataset/GloVe/
+curl -Lo inferSent/encoder/infersent1.pickle https://affect.media.mit.edu/neural_chat/inferSent/encoder/infersent1.pickle
+```
 
+You can instead download [fastText](https://fasttext.cc/docs/en/english-vectors.html) [5.83GB] (V2) vectors and the corresponding InferSent model. We suggest using GloVe:
+```bach
 mkdir inferSent/dataset/fastText
 curl -Lo inferSent/dataset/fastText/crawl-300d-2M.vec.zip https://dl.fbaipublicfiles.com/fasttext/vectors-english/crawl-300d-2M-subword.zip
 unzip inferSent/dataset/fastText/crawl-300d-2M.vec.zip -d inferSent/dataset/fastText/
-```
-
-Download the pre-trained InferSent models (V1 trained with GloVe, V2 trained with fastText) [154MB each]:
-```bash
-curl -Lo inferSent/encoder/infersent1.pickle https://affect.media.mit.edu/neural_chat/inferSent/encoder/infersent1.pickle
 curl -Lo inferSent/encoder/infersent2.pickle https://affect.media.mit.edu/neural_chat/inferSent/encoder/infersent2.pickle
 ```
+
 Note that infersent1 is trained with GloVe (which have been trained on text preprocessed with the PTB tokenizer) and infersent2 is trained with fastText (which have been trained on text preprocessed with the MOSES tokenizer). The latter also removes the padding of zeros with max-pooling which was inconvenient when embedding sentences outside of their batches.
 
 ### TorchMoji Setup
@@ -98,8 +105,8 @@ Go to the model directory and set the save_dir in configs.py (this is where the 
 By default, it will save a model checkpoint every epoch to <save_dir> and a tensorboard summary.
 For more arguments and options, see config.py.
 
-Note that after training, you should only keep the single optimal checkpoint in the checkpoint directory for 
-[evaluation](#evaluation) and [interaction](#interacting-with-models) steps and remove the 
+Note that after training, you should only keep the single optimal checkpoint in the checkpoint directory for
+[evaluation](#evaluation) and [interaction](#interacting-with-models) steps and remove the
 remaining checkpoints.
 
 We provide our implementation of EI (Emotion+Infersent) models built upon implementations for [VHCR](https://arxiv.org/pdf/1804.03424.pdf), [VHRED](https://arxiv.org/abs/1605.06069), and [HRED](https://arxiv.org/abs/1507.02221).
@@ -158,12 +165,22 @@ Please refer to [**Neural Chat Web**](https://github.com/asmadotgh/neural_chat_w
 ## Reference
 If you use this code or the released Reddit dataset, please reference one of the following papers:
 
-For reinforcement learning in dialog systems, refer to:
+For batch reinforcement learning in dialog systems, refer to:
 ```
 @article{jaques2019way,
   title={Way Off-Policy Batch Deep Reinforcement Learning of Implicit Human Preferences in Dialog},
   author={Jaques, Natasha and Ghandeharioun, Asma and Shen, Judy and Ferguson, Craig and Jones, Noah, and Lapedriza, Agata and Gu, Shixiang and Picard, Rosalind},
   journal={arXiv preprint arXiv:},
+```
+
+For hierarchical reinforcement learning for open-domain dialog, refer to:
+```
+@article{saleh2019hier,
+  title={Hierarchical Reinforcement Learning for Open-Domain Dialog},
+  author={Saleh, Abdelrhman and Jaques, Natasha and Ghandeharioun, Asma and Shen, Judy and Picard, Rosalind},
+  journal={arXiv preprint arXiv:1909.07547},
+  year={2019}
+}
 ```
 
 For interactive evaluation, use of Reddit dataset, miscellaneous use-cases, refer to [the following paper](https://arxiv.org/abs/1906.09308):

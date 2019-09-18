@@ -4,7 +4,7 @@ from inferSent.api.botsent import Botsent
 import model.models as models
 from model.layers import masked_cross_entropy, cross_entropy_soft_targets, mean_squared_error
 from model.utils import Tokenizer, to_var, time_desc_decorator, TensorboardWriter, embedding_metric, pad_tokens, \
-    UNK_ID, EOS_ID, detokenize, convert_old_checkpoint_format
+    UNK_ID, EOS_ID, detokenize, convert_old_checkpoint_format, pad_conversation
 from model.utils.novel_metrics import novel_metrics
 
 import os
@@ -43,9 +43,11 @@ class Solver(object):
         self.vocab = vocab
         self.is_train = is_train
         self.model = model
-        self.botmoji = Botmoji()
-        self.botsent = Botsent(config.dataset_dir.joinpath('train'), version=1, explained_var=0.95)
         self.detokenizer = Detok()
+
+        if config.emotion or config.infersent or config.context_input_only:
+            self.botmoji = Botmoji()
+            self.botsent = Botsent(config.dataset_dir.joinpath('train'), version=1, explained_var=0.95)
 
         # Info for saving epoch metrics to a csv file
         if self.config.mode == 'train':
@@ -124,7 +126,8 @@ class Solver(object):
             base_checkpoint_dir = str(Path(checkpoint).parent)
             ckpt_file = checkpoint.replace(base_checkpoint_dir, '')
             ckpt_file = ckpt_file.replace('/', '')
-            self.epoch_i = int(ckpt_file[len('q_net'):ckpt_file.find('.')])
+            net = ckpt_file.split('_')[0] + '_net'
+            self.epoch_i = int(ckpt_file[len(net):ckpt_file.find('.')])
         ckpt = torch.load(checkpoint)
 
         # Maintain backwards compatibility of checkpoints
@@ -501,13 +504,17 @@ class Solver(object):
             print("\033[1A\033[K")
 
         if print_history:
-            for s in context_sentences: print(s)
+            user_turn = True
+            for s in context_sentences:
+                name = username if user_turn else model_name
+                print(name + ': ', s)
+                user_turn = not user_turn
 
-    def process_raw_text_into_input(self, raw_text_sentences, 
-                                    max_sentence_length=30, 
+    def process_raw_text_into_input(self, raw_text_sentences,
+                                    max_sentence_length=30,
                                     max_conversation_length=5, debug=False,
                                     priming_condition=0):
-        sentences, lens = self.process_user_input(raw_text_sentences, 
+        sentences, lens = self.process_user_input(raw_text_sentences,
                                                   max_sentence_length)
 
         # Remove any sentences of length 0
@@ -564,20 +571,20 @@ class Solver(object):
             for sent in sentences:
                 print(self.vocab.decode(list(sent)))
 
-        return (input_sentences, input_sentence_length, 
+        return (input_sentences, input_sentence_length,
                 input_conversation_length, extra_context_inputs)
 
-    def generate_response_to_input(self, raw_text_sentences, 
+    def generate_response_to_input(self, raw_text_sentences,
                                    max_conversation_length=5,
-                                   max_sentence_length=30, debug=False, 
-                                   emojize=False, sample_by='priority', 
+                                   max_sentence_length=30, debug=False,
+                                   emojize=False, sample_by='priority',
                                    priming_condition=0):
-        (input_sentences, input_sentence_length, input_conversation_length, 
+        (input_sentences, input_sentence_length, input_conversation_length,
          extra_context_inputs) = self.process_raw_text_into_input(
-             raw_text_sentences, max_sentence_length=max_sentence_length, 
-             max_conversation_length=max_conversation_length, 
+             raw_text_sentences, max_sentence_length=max_sentence_length,
+             max_conversation_length=max_conversation_length,
              debug=debug, priming_condition=priming_condition)
-        
+
         output = self.model(input_sentences,
                             input_sentence_length,
                             input_conversation_length,
@@ -591,7 +598,7 @@ class Solver(object):
             print('\n**All generated responses:**')
             for gen in generated_sentences:
                 print(detokenize(self.vocab.decode(list(gen))))
-        
+
         gen_response = self.select_best_generated_response(
             generated_sentences, sample_by)
 
@@ -602,12 +609,12 @@ class Solver(object):
             inferred_emojis = self.botmoji.emojize_text(
                 raw_text_sentences[-1], 5, 0.07)
             decoded_response = inferred_emojis + " " + decoded_response
-        
+
         return decoded_response
-    
-    def select_best_generated_response(self, generated_sentences, 
+
+    def select_best_generated_response(self, generated_sentences,
                                        sample_by='priority', beam_size=None):
-        """ Args: 
+        """ Args:
                 generated_sentences: arrays of word IDs to be decoded
                 sample_by: can be None for no sampling, 'priority', or 'length'.
         """
@@ -617,11 +624,11 @@ class Solver(object):
 
         if len(generated_sentences) == 1:
             return generated_sentences[0]
-        
+
         # Ensure each sentence has an end of sentence token.
         for i, gen in enumerate(generated_sentences):
             if EOS_ID not in gen:
-                generated_sentences[i] = np.concatenate((gen[:-1], 
+                generated_sentences[i] = np.concatenate((gen[:-1],
                                                         np.array([EOS_ID])))
 
         if len(generated_sentences) > 1:
@@ -854,9 +861,11 @@ class VariationalSolver(Solver):
         self.vocab = vocab
         self.is_train = is_train
         self.model = model
-        self.botmoji = Botmoji()
-        self.botsent = Botsent(config.dataset_dir.joinpath('train'), version=1, explained_var=0.95)
         self.detokenizer = Detok()
+
+        if config.emotion or config.infersent or config.context_input_only:
+            self.botmoji = Botmoji()
+            self.botsent = Botsent(config.dataset_dir.joinpath('train'), version=1, explained_var=0.95)
 
         # Info for saving epoch metrics to a csv file
         if self.config.mode == 'train':
@@ -1100,6 +1109,33 @@ class VariationalSolver(Solver):
         assert not isnan(results['batch_loss'].item())
 
         return results
+
+    def batchify(self, conversations, max_sentence_length=30,
+                 max_conversation_length=5):
+        """Function to process list of text conversations into model input batch format.
+        Note we add a repeated dummy sentence to each conversation.
+        This dummy is included in sent len but not conv len
+        Only called in hrl_tune.py
+        """
+        tokenized_convs = [[tokenizer(sent) for sent in conv] for conv in conversations]
+        trimmed_convs = [[sent[:max_sentence_length-1]
+                          for sent in conv[:max_conversation_length]] + [conv[-1][:max_sentence_length-1]]
+                          for conv in tokenized_convs]
+        conversation_length = [len(conv)-1 for conv in trimmed_convs]
+        sentence_length = [[len(sent)+1 for sent in conv] for conv in trimmed_convs]
+        padded_convs = [pad_conversation(conv) for conv in trimmed_convs]
+        coded_convs = [self.eval_data_loader.dataset.sent2id(conv) for conv in padded_convs]
+
+        # flatten input conversations
+        sentences = [sent for conv in coded_convs for sent in conv]
+        sentence_length = [l for len_list in sentence_length for l in len_list]
+
+        with torch.no_grad():
+            sentences = to_var(torch.LongTensor(sentences))
+            sentence_length = to_var(torch.LongTensor(sentence_length))
+            conversation_length = to_var(torch.LongTensor(conversation_length))
+
+        return sentences, sentence_length, conversation_length
 
     def generate_sentence(self, sentences, sentence_length,
                           input_conversation_length, input_sentences,

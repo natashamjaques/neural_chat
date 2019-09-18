@@ -4,6 +4,11 @@ metrics_and_analysis/web_data
 metrics_and_analysis/training_results
 model/results
 checkpoints/
+UniversalSentenceEncoder/*
+!UniversalSentenceEncoder/*.py
+Toxicity/*
+!Toxicity/*.py
+!ParlAI/*
 model/results
 /fonts/
 *.png

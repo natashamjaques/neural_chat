@@ -2,7 +2,6 @@ import os
 import argparse
 import ast
 from datetime import datetime
-from collections import defaultdict
 from pathlib import Path
 import pprint
 from torch import optim
@@ -16,7 +15,7 @@ optimizer_dict = {'RMSprop': optim.RMSprop, 'Adam': optim.Adam}
 rnn_dict = {'lstm': nn.LSTM, 'gru': nn.GRU}
 rnncell_dict = {'lstm': StackedLSTMCell, 'gru': StackedGRUCell}
 username = Path.home().name
-save_dir = Path(os.path.expanduser('~')+'/neural_chat/model_checkpoints/')
+save_dir = project_dir.joinpath('model_checkpoints')
 
 
 def str2bool(v):
@@ -69,16 +68,16 @@ class Config(object):
         if self.emotion or self.calc_novel_embedding:
             self.emojis_path = self.data_dir.joinpath('sentence_emojis.pkl')
             if 'input_only' not in extra_model_desc: extra_model_desc += "emotion_"
-        
+
         if self.infersent or self.calc_novel_embedding:
             self.infersent_path = self.data_dir.joinpath('sentence_embeddings_1_PCA_0.95.pkl')
             if 'input_only' not in extra_model_desc: extra_model_desc += "infersent_"
 
         # Save path
         if self.mode == 'train' and self.checkpoint is None:
-            time_now = datetime.now().strftime('%Y-%m-%d_%H:%M:%S.%f')[:-3]
+            time_now = datetime.now().strftime('%Y-%m-%d_%H;%M;%S')
             self.save_path = save_dir.joinpath(
-                self.data, self.extra_save_dir, extra_model_desc + self.model, 
+                self.data, self.extra_save_dir, extra_model_desc + self.model,
                 time_now)
             self.logdir = self.save_path
             os.makedirs(self.save_path, exist_ok=True)
@@ -129,8 +128,8 @@ def get_config(parse=True, **optional_kwargs):
     parser.add_argument('--mode', type=str, default='train')
 
     # Train
-    parser.add_argument('--batch_size', type=int, default=80)
-    parser.add_argument('--eval_batch_size', type=int, default=80)
+    parser.add_argument('--batch_size', type=int, default=64)
+    parser.add_argument('--eval_batch_size', type=int, default=64)
     parser.add_argument('--n_epoch', type=int, default=30)
     parser.add_argument('--learning_rate', type=float, default=1e-4)
     parser.add_argument('--optimizer', type=str, default='Adam')
@@ -209,22 +208,6 @@ def get_config_from_dir(checkpoint_dir, **optional_kwargs):
     f = open(os.path.join(checkpoint_dir, 'config.txt'), 'r')
     lines = f.readlines()
 
-    # Find latest checkpoint in directory
-    if 'load_rl_ckpt' in optional_kwargs and optional_kwargs['load_rl_ckpt']:
-        if 'rl_ckpt_epoch' in optional_kwargs and optional_kwargs['rl_ckpt_epoch']:
-            ckpt_num = optional_kwargs['rl_ckpt_epoch']
-        else:
-            checkpoints = [f for f in os.listdir(checkpoint_dir) if '.pkl' in f]
-            checkpoint_nums = [int(f[len('q_net'):f.find('.')]) for f in checkpoints if 'q_net' in f and 'target' not in f]
-            ckpt_num = sorted(checkpoint_nums)[-1]
-        latest_checkpoint = os.path.join(checkpoint_dir, 'q_net' + str(ckpt_num) + '.pkl')
-    else:
-        checkpoints = [f for f in os.listdir(checkpoint_dir) if str.isdigit(f[0])]
-        checkpoint_nums = [int(f[:f.find('.')]) for f in checkpoints]
-        latest = sorted(checkpoint_nums)[-1]
-        latest_checkpoint = os.path.join(checkpoint_dir, str(latest) + '.pkl')
-    print('Found latest checkpoint', latest_checkpoint)
-    
     # Transform raw file lines into appropriate dict format
     lines = lines[1:]   # Discard line reading 'Configurations'
     lines = [l for l in lines if 'Posix' not in l]
@@ -250,11 +233,34 @@ def get_config_from_dir(checkpoint_dir, **optional_kwargs):
     # Override with additional config args
     config_dict.update(optional_kwargs)
 
+    # Find latest checkpoint in directory
+    if (('load_rl_ckpt' in optional_kwargs and optional_kwargs['load_rl_ckpt'])
+        or ('load_rl_ckpt' in config_dict and config_dict['load_rl_ckpt'])):
+        checkpoints = [f for f in os.listdir(checkpoint_dir) if '.pkl' in f]
+        if 'rl_ckpt_epoch' in optional_kwargs and optional_kwargs['rl_ckpt_epoch']:
+            ckpt_num = optional_kwargs['rl_ckpt_epoch']
+        else:
+            checkpoint_nums = []
+            for c in checkpoints:
+                if 'target' in c:
+                    continue
+                else:
+                    net = c.split('_')[0] + '_net'
+                    checkpoint_nums.append(int(c[len(net):c.find('.')]))
+            ckpt_num = sorted(checkpoint_nums)[-1]
+        latest_checkpoint = os.path.join(checkpoint_dir, net + str(ckpt_num) + '.pkl')
+    else:
+        checkpoints = [f for f in os.listdir(checkpoint_dir) if str.isdigit(f[0])]
+        checkpoint_nums = [int(f[:f.find('.')]) for f in checkpoints]
+        latest = sorted(checkpoint_nums)[-1]
+        latest_checkpoint = os.path.join(checkpoint_dir, str(latest) + '.pkl')
+    print('Found latest checkpoint', latest_checkpoint)
+
     # Override with checkpoint
-    config_dict['checkpoint'] = os.path.join(checkpoint_dir, latest_checkpoint)
-    
+    config_dict['checkpoint'] = latest_checkpoint
+
     # Backwards compatibility with new features
-    new_features = ['context_input_only', 'emo_weight', 'emotion', 
+    new_features = ['context_input_only', 'emo_weight', 'emotion',
                     'infersent', 'infersent_weight', 'load_rl_ckpt']
     for feat in new_features:
         if feat not in config_dict:

@@ -87,7 +87,8 @@ class EncoderRNN(BaseRNNEncoder):
                         batch_first=batch_first,
                         dropout=dropout,
                         bidirectional=bidirectional)
-
+        self.rnn.flatten_parameters()
+        
     def forward(self, inputs, input_length, hidden=None):
         """
         Args:
@@ -121,7 +122,7 @@ class EncoderRNN(BaseRNNEncoder):
 
         # outputs: [batch, seq_len, hidden_size * num_directions]
         # hidden: [num_layers * num_directions, batch, hidden_size]
-        self.rnn.flatten_parameters()
+
         outputs, hidden = self.rnn(rnn_input, hidden)
         outputs, outputs_lengths = pad_packed_sequence(outputs, batch_first=self.batch_first)
 
@@ -163,6 +164,7 @@ class ContextRNN(BaseRNNEncoder):
                         batch_first=batch_first,
                         dropout=dropout,
                         bidirectional=bidirectional)
+        self.rnn.flatten_parameters()
 
     def forward(self, encoder_hidden, conversation_length, hidden=None):
         """
@@ -187,7 +189,7 @@ class ContextRNN(BaseRNNEncoder):
 
         hidden = self.init_h(batch_size, hidden=hidden)
 
-        self.rnn.flatten_parameters()
+
         outputs, hidden = self.rnn(rnn_input, hidden)
 
         # outputs: [batch_size, max_conversation_length, context_size]
