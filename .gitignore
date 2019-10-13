@@ -17,6 +17,7 @@ model/results
 /etc/
 datasets/
 /cornell_movie_dialogue/
+model_checkpoints/
 *.orig
 *.lprof
 .idea

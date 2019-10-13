@@ -1,0 +1,8 @@
+LICENCE
+.gitignore
+README.md
+docker
+inferSent/dataset/GloVe
+inferSent/encoder/infersent1.pickle
+datasets
+model_checkpoints
