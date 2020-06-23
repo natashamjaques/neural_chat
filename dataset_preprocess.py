@@ -145,12 +145,10 @@ def prepare_multiwoz_data():
         zip_ref.extractall(multiwoz_dir)
         zip_ref.close()
 
-        datasets_dir.joinpath('cornell movie-dialogs corpus').rename(cornell_dir)
-
         print(f'Successfully extracted {zipfile_path}')
 
     else:
-        print('Cornell data prepared!')
+        print('MultiWOZ data prepared!')
 
 
 def load_lines(file_name,
@@ -333,19 +331,57 @@ if __name__ == '__main__':
         shortcut_download(args.dataset, args.shortcut_compression_type)
     else:
         conversations = []
-        # Cornell data
+        train, valid, test = [], [], []
+        # prepare data
         if args.dataset == 'cornell':
             dataset_dir = cornell_dir
             conversations = load_conversations_cornell(cornell_dir)
-        # Reddit_casual data
-        else:
+
+            print('Train/Valid/Test Split')
+            train, valid, test = train_valid_test_split_by_conversation(conversations, split_ratio)
+
+        elif args.dataset == 'reddit_casual':
             prepare_reddit_casual_data()
             dataset_dir = datasets_dir.joinpath(args.dataset)
             with open('datasets/{}/{}.json'.format(args.dataset, args.dataset), 'r') as f:
                 conversations = json.load(f)
 
-        print('Train/Valid/Test Split')
-        train, valid, test = train_valid_test_split_by_conversation(conversations, split_ratio)
+            print('Train/Valid/Test Split')
+            train, valid, test = train_valid_test_split_by_conversation(conversations, split_ratio)
+
+        elif args.dataset == 'multiwoz':
+            prepare_multiwoz_data()
+            dataset_dir = datasets_dir.joinpath(args.dataset)
+            with open('datasets/multiwoz/MultiWOZ_2.1/data.json') as f:
+                conversations = json.load(f)
+
+            # load train and validation file names
+            print('Train/Valid/Test Split')
+            with open('datasets/multiwoz/MultiWOZ_2.1/valListFile.txt') as f:
+                valList = set(f.read().split())
+            with open('datasets/multiwoz/MultiWOZ_2.1/testListFile.txt') as f:
+                testList = set(f.read().split())
+
+            # convert json into multiwoz format
+            print('Convert into lines')
+            conversations_new = dict()
+            for fn, c in conversations.items():
+                lines = {
+                    'lines': [
+                        {'character': i % 2, 'text': l['text']} \
+                        for i, l in enumerate(c['log'])
+                    ]
+                }
+
+                if fn in valList:
+                    valid.append(lines)
+                elif fn in testList:
+                    test.append(lines)
+                else:
+                    train.append(lines)
+
+        else:
+            raise NotImplementedError
 
         def to_pickle(obj, path):
             with open(path, 'wb') as f:
