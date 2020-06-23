@@ -19,6 +19,7 @@ project_dir = Path(__file__).resolve().parent
 datasets_dir = project_dir.joinpath('datasets')
 cornell_dir = datasets_dir.joinpath('cornell')
 reddit_casual_dir = datasets_dir.joinpath('reddit_casual')
+multiwoz_dir = datasets_dir.joinpath('multiwoz')
 
 # Tokenizer
 tokenizer = Tokenizer('spacy')
@@ -115,6 +116,33 @@ def prepare_cornell_data():
 
         zip_ref = ZipFile(zipfile_path, 'r')
         zip_ref.extractall(datasets_dir)
+        zip_ref.close()
+
+        datasets_dir.joinpath('cornell movie-dialogs corpus').rename(cornell_dir)
+
+        print(f'Successfully extracted {zipfile_path}')
+
+    else:
+        print('Cornell data prepared!')
+
+
+def prepare_multiwoz_data():
+    """Download and unpack multiwoz"""
+
+    zip_url = "https://github.com/budzianowski/multiwoz/raw/master/data/MultiWOZ_2.1.zip"
+    zipfile_path = datasets_dir.joinpath('multiwoz.zip')
+
+    if not os.path.exists(datasets_dir):
+        os.makedirs(datasets_dir)
+
+    # Prepare Dialog data
+    if not os.path.exists(multiwoz_dir):
+        print(f'Downloading {zip_url} to {zipfile_path}')
+        urlretrieve(zip_url, zipfile_path)
+        print(f'Successfully downloaded {zipfile_path}')
+
+        zip_ref = ZipFile(zipfile_path, 'r')
+        zip_ref.extractall(multiwoz_dir)
         zip_ref.close()
 
         datasets_dir.joinpath('cornell movie-dialogs corpus').rename(cornell_dir)
