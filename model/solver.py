@@ -449,8 +449,8 @@ class Solver(object):
         return coded, lens
 
     def self_play(self, conversation_length=10, max_sentence_length=30, max_conversation_length=5,
-                  sample_by='priority', print_history=False):
-        context_sentences = ['']
+                  sample_by='priority', print_history=False, first_interaction=''):
+        context_sentences = [first_interaction]
 
         for i in range(conversation_length):
             gen_response = self.generate_response_to_input(
@@ -463,7 +463,9 @@ class Solver(object):
         if print_history:
             for s in context_sentences:
                 print(s)
-        # removing the first empty prompt
+            print('--------------------')
+
+    # removing the first empty prompt
         return context_sentences[1:]
 
     def interact(self, max_sentence_length=30, max_conversation_length=5,

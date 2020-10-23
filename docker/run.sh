@@ -27,4 +27,4 @@ else
   IT="True"
 fi
 
-docker run --gpus all ${DETACH:+-d} ${IT:+-it} -v $MODELS_VOLUME -v $GLOVE_VOLUME -v $CHECKPOINTS_VOLUME -v $INFERSENT_PICKLE_VOLUME $DOCKER_IMAGE:latest $@
+docker run --gpus '"device=1"' ${DETACH:+-d} ${IT:+-it} -p 0.0.0.0:6009:6009 -v $MODELS_VOLUME -v $GLOVE_VOLUME -v $CHECKPOINTS_VOLUME -v $INFERSENT_PICKLE_VOLUME $DOCKER_IMAGE:latest $@
