@@ -90,7 +90,7 @@ if __name__ == "__main__":
                 # Map to emojis
                 emojis = map(lambda x: EMOJIS[x], emoji_ids)
                 print('Retokenized: ', st.to_sentence(list(tokenized[0])))
-                print(emoji.emojize("{} {}".format(sentence, ' '.join(emojis)), use_aliases=True))
+                # print(emoji.emojize("{} {}".format(sentence, ' '.join(emojis)), use_aliases=True))
 
         if idx % args.step == 0:
             print('Step: ', idx)

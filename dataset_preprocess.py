@@ -1,20 +1,22 @@
 # Download/Preprocess data-sets
 
-from multiprocessing import Pool
 import argparse
+import json
+import os
 import pickle
 import random
-import os
-import json
+import tarfile
+from multiprocessing import Pool
+from pathlib import Path
+from subprocess import call
 from urllib.request import urlretrieve
 from zipfile import ZipFile
-from pathlib import Path
+
 from tqdm import tqdm
+print('import things')
 from model.utils import Tokenizer, Vocab, PAD_TOKEN, SOS_TOKEN, EOS_TOKEN, pad_sentences
-from subprocess import call
 
-import tarfile
-
+print('start')
 project_dir = Path(__file__).resolve().parent
 datasets_dir = project_dir.joinpath('datasets')
 cornell_dir = datasets_dir.joinpath('cornell')
@@ -32,13 +34,17 @@ def shortcut_download(dataset, compression_type='tar.gz'):
         compression_type = 'tar.gz'
 
     if dataset == 'reddit_casual' and compression_type == 'zip':
-        print('Warning! Zip format is not supported for reddit casual dataset due to file size. Changing to tar.gz')
+        print(
+            'Warning! Zip format is not supported for reddit casual dataset due to file size. '
+            'Changing to tar.gz'
+        )
         compression_type = 'tar.gz'
 
     if not os.path.exists(datasets_dir):
         os.makedirs(datasets_dir)
 
-    compressed_url = f'https://affect.media.mit.edu/neural_chat/datasets/{dataset}_preprocessed.{compression_type}'
+    compressed_url = f'https://affect.media.mit.edu/neural_chat/datasets/' \
+                     f'{dataset}_preprocessed.{compression_type}'
     compressed_file_dir = datasets_dir.joinpath(dataset)
     compressed_file_path = datasets_dir.joinpath(f'{dataset}_preprocessed.{compression_type}')
 
@@ -70,7 +76,6 @@ def shortcut_download(dataset, compression_type='tar.gz'):
         print(f'Successfully extracted {compressed_file_path}')
     else:
         print('Directory already exists. Aborting download.')
-
 
 
 def prepare_reddit_casual_data():
@@ -252,14 +257,15 @@ def pad_sentences(conversations, max_sentence_length=30, max_conversation_length
 
 def load_conversations_cornell(cornell_dir):
     # Download and extract dialogs if necessary.
-    prepare_cornell_data()
-
+    if download:
+        prepare_cornell_data()
+    cornell_path = cornell_dir.joinpath(f'lines_{recall}/{toxic}')
     print("Loading lines")
-    lines = load_lines(cornell_dir.joinpath("movie_lines.txt"))
+    lines = load_lines(cornell_path.joinpath("movie_lines.txt"))
     print('Number of lines:', len(lines))
 
     print("Loading conversations...")
-    conversations = load_conversations(cornell_dir.joinpath("movie_conversations.txt"), lines)
+    conversations = load_conversations(cornell_path.joinpath("movie_conversations.txt"), lines)
     print('Number of conversations:', len(conversations))
     return conversations
 
@@ -287,6 +293,15 @@ if __name__ == '__main__':
     # Input dataset
     parser.add_argument('--dataset', type=str, default='cornell')
 
+    # Does the dataset need to be downloaded
+    parser.add_argument('--download', default=False, action='store_true')
+
+    # Use toxic or non toxic dataset
+    parser.add_argument('--classified-as', type=str, default='notoxic')
+
+    # Which Recall dataset to use
+    parser.add_argument('--recall', type=str, default='0.8')
+
     # Bypassing pre-processing by directly downloading all the files
     parser.add_argument('--shortcut', action="store_true", default=False,
                         help="Whether to download the preprocessed dataset instead.")
@@ -300,6 +315,9 @@ if __name__ == '__main__':
     max_vocab_size = args.max_vocab_size
     min_freq = args.min_vocab_frequency
     n_workers = args.n_workers
+    download = args.download
+    toxic = args.classified_as
+    recall = args.recall
 
     if args.shortcut:
         shortcut_download(args.dataset, args.shortcut_compression_type)
@@ -319,9 +337,11 @@ if __name__ == '__main__':
         print('Train/Valid/Test Split')
         train, valid, test = train_valid_test_split_by_conversation(conversations, split_ratio)
 
+
         def to_pickle(obj, path):
             with open(path, 'wb') as f:
                 pickle.dump(obj, f)
+
 
         for split_type, conv_objects in [('train', train), ('valid', valid), ('test', test)]:
             print(f'Processing {split_type} dataset...')
@@ -330,18 +350,21 @@ if __name__ == '__main__':
 
             print(f'Tokenize.. (n_workers={n_workers})')
 
+
             def _tokenize_conversation(conv):
                 return tokenize_conversation(conv['lines'])
 
+
             with Pool(n_workers) as pool:
                 conversations = list(tqdm(pool.imap(_tokenize_conversation, conv_objects),
-                                         total=len(conv_objects)))
+                                          total=len(conv_objects)))
 
             conversation_length = [min(len(conv['lines']), max_conv_len)
                                    for conv in conv_objects]
 
-            raw_sentences = [[line['text'] for line in conv['lines'][0:min(len(conv['lines']), max_conv_len)]]
-                             for conv in conv_objects]
+            raw_sentences = [
+                [line['text'] for line in conv['lines'][0:min(len(conv['lines']), max_conv_len)]]
+                for conv in conv_objects]
 
             sentences, sentence_length = pad_sentences(
                 conversations,
@@ -355,31 +378,35 @@ if __name__ == '__main__':
             to_pickle(sentence_length, split_data_dir.joinpath('sentence_length.pkl'))
 
             if split_type == 'train':
-
                 print('Save Vocabulary...')
                 vocab = Vocab(tokenizer)
                 vocab.add_dataframe(conversations)
                 vocab.update(max_size=max_vocab_size, min_freq=min_freq)
 
                 print('Vocabulary size: ', len(vocab))
-                vocab.pickle(dataset_dir.joinpath('word2id.pkl'), dataset_dir.joinpath('id2word.pkl'))
+                vocab.pickle(dataset_dir.joinpath('word2id.pkl'),
+                             dataset_dir.joinpath('id2word.pkl'))
 
         print('Done downloading and pre-processing dataset.')
 
         print('Inferring InferSent encoding for dataset...')
-        infersent_export_script = os.path.join(os.path.join('inferSent', 'api'), 'export_dataset_embeddings.py')
+        infersent_export_script = os.path.join(os.path.join('inferSent', 'api'),
+                                               'export_dataset_embeddings.py')
         for split_type in ['train', 'valid', 'test']:
             filepath = os.path.join(os.path.join(dataset_dir, split_type), 'raw_sentences.pkl')
             if split_type == 'train':
                 call(["python", infersent_export_script, f'--filepath={filepath}', '--streaming'])
             else:
                 call(["python", infersent_export_script, f'--filepath={filepath}'])
-        infersent_reduction_script = os.path.join(os.path.join('inferSent', 'api'), 'reduce_embeddings_dimension.py')
-        call(["python", infersent_reduction_script, f'--dataset={dataset_dir}', '--savepca', '--exportembeddings'])
+        infersent_reduction_script = os.path.join(os.path.join('inferSent', 'api'),
+                                                  'reduce_embeddings_dimension.py')
+        call(["python", infersent_reduction_script, f'--dataset={dataset_dir}', '--savepca',
+              '--exportembeddings'])
         print('Done exporting InferSent embedding.')
 
         print('Inferring TorchMoji encoding for dataset...')
-        torchmoji_export_script = os.path.join(os.path.join('torchMoji', 'api'), 'dataset_emojize.py')
+        torchmoji_export_script = os.path.join(os.path.join('torchMoji', 'api'),
+                                               'dataset_emojize.py')
         for split_type in ['train', 'valid', 'test']:
             filepath = os.path.join(os.path.join(dataset_dir, split_type), 'raw_sentences.pkl')
             call(["python", torchmoji_export_script, f'--filepath={filepath}'])

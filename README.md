@@ -5,7 +5,7 @@ This repository is accompanied by [Neural Chat Web](https://github.com/asmadotgh
 
 This code is inspired by and built off of "A Hierarchical Latent Structure for Variational Conversation Modeling" ([code](https://github.com/ctr4si/A-Hierarchical-Latent-Structure-for-Variational-Conversation-Modeling), [paper](https://arxiv.org/abs/1804.03424), [presentation](https://vimeo.com/277671819)).
 
-## Prerequisites
+## Prerequisites for running in local machine
 This section includes installation of required libraries, and downloading pre-trained models.
 
 ### Installation
@@ -57,7 +57,12 @@ Run the download script to downloads the pre-trained torchMoji weights [~85MB] f
 python torchMoji/scripts/download_weights.py
 ```
 
+## Running using Docker
+
+To run the project using docker, check the [corresponding](docker/README.md) file
+
 ## Download & Preprocess Data
+
 The following scripts will:
 
 1. Create directories `./datasets/reddit_casual/` and `./datasets/cornell/` respectively.
