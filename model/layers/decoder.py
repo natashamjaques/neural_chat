@@ -184,7 +184,7 @@ class BaseRNNDecoder(nn.Module):
             #       Later used as back-pointer at backtracking
             #       Each element is beam index: 0 ~ beam_size
             #                     + position index: 0 ~ beam_size x (batch_size-1)
-            beam_idx = top_k_idx / self.vocab_size  # [batch_size, beam_size]
+            beam_idx = top_k_idx // self.vocab_size  # [batch_size, beam_size]
             top_k_pointer = (beam_idx + batch_position.unsqueeze(1)).view(-1)
 
             # Select next h (size doesn't change)
